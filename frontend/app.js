@@ -1,5 +1,22 @@
-const API_BASE = "http://127.0.0.1:8000";
+// --- 自動偵測 API 端點 ---
+// 本地開發 → localhost backend；GitHub Pages → 需設定 PRODUCTION_BACKEND_URL
+const _host = location.hostname;
+const _isLocal = _host === "127.0.0.1" || _host === "localhost" || _host === "0.0.0.0";
+const API_BASE = _isLocal
+  ? "http://127.0.0.1:8000"
+  : (window.CYBER_COMPANION_BACKEND || "");  // GitHub Pages 需在 HTML 設定或留空顯示提示
+
 const USER_ID = "demo_user";
+
+// GitHub Pages 無後端時顯示醒目提示
+if (!_isLocal && !API_BASE) {
+  document.addEventListener("DOMContentLoaded", () => {
+    const banner = document.createElement("div");
+    banner.style.cssText = "background:#ff9800;color:#000;padding:10px 16px;text-align:center;font-size:14px;font-weight:600";
+    banner.textContent = "⚠️ 未設定後端 API。請啟動本地伺服器並改用 http://127.0.0.1:5500 測試，或設定 CYBER_COMPANION_BACKEND 指向公開後端。";
+    document.body.prepend(banner);
+  });
+}
 
 const chatWindow = document.getElementById("chatWindow");
 const userInput = document.getElementById("userInput");
@@ -166,8 +183,9 @@ async function loadModels() {
     updateCurrentModelLabel(data.current_model || models[0]);
     renderModels();
   } catch (err) {
+    const hint = !API_BASE ? "（⚠️ GitHub Pages 無法連線本地後端，請用 http://127.0.0.1:5500 測試）" : "請確認後端 8000 有啟動";
     currentModelLabel.textContent = "模型清單連線失敗";
-    if (modelList) modelList.innerHTML = `<div class="model-error">無法讀取 /models，請確認後端 8000 有啟動。</div>`;
+    if (modelList) modelList.innerHTML = `<div class="model-error">無法讀取 /models，${hint}。</div>`;
   }
 }
 
@@ -227,7 +245,8 @@ async function loadState() {
     const data = await res.json();
     setState(data);
   } catch (err) {
-    appendSystemChip("目前連不到後端狀態，請先啟動 FastAPI 服務。");
+    const hint = !API_BASE ? "（GitHub Pages 無法連線本地後端，請改用 http://127.0.0.1:5500）" : "請先啟動 FastAPI 服務";
+    appendSystemChip(`目前連不到後端狀態，${hint}。`);
   }
 }
 
@@ -305,7 +324,8 @@ async function sendMessage(overridePayload = null) {
     setState(data);
     if (isQuickAction) appendSystemChip("✅ 已送出");
   } catch (err) {
-    appendMessage("ai", "連線失敗了，稍後再試一次好嗎？", "error");
+    const hint = !API_BASE ? "（⚠️ 未設定 API 端點，GitHub Pages 無法連線本地後端）" : "";
+    appendMessage("ai", `連線失敗了，稍後再試一次好嗎？\n${hint}`, "error");
     if (isQuickAction) appendSystemChip("⚠️ 動作失敗，請確認後端服務後重試");
   } finally {
     hideTypingIndicator();
