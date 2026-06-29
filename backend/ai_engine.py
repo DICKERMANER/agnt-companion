@@ -107,7 +107,7 @@ async def call_openai_compatible(
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
 
-    async with httpx.AsyncClient(timeout=35.0) as client:
+    async with httpx.AsyncClient(timeout=90.0) as client:
         resp = await client.post(endpoint, headers=headers, json=payload)
         resp.raise_for_status()
         data = resp.json()
@@ -116,13 +116,25 @@ async def call_openai_compatible(
         if not text:
             reasoning = (message.get("reasoning") or "").strip()
             finish_reason = data.get("choices", [{}])[0].get("finish_reason", "unknown")
-            # 有些 Ollama / reasoning 模型會只吐 reasoning、不吐 content；前端看起來就像「按鈕沒反應」。
-            # 這裡回傳可讀診斷，避免空泡泡。
+            # 有些 Ollama / reasoning 模型會只吐 reasoning、不吐 content；前後端看起來就像「按鈕沒反應」。
+            # 這裡自動重試一次，加上 max_tokens 強制模型吐出 content。
+            retry_payload = {**payload, "max_tokens": 512}
+            try:
+                async with httpx.AsyncClient(timeout=90.0) as retry_client:
+                    retry_resp = await retry_client.post(endpoint, headers=headers, json=retry_payload)
+                    retry_resp.raise_for_status()
+                    retry_data = retry_resp.json()
+                    retry_message = retry_data.get("choices", [{}])[0].get("message", {})
+                    retry_text = (retry_message.get("content") or "").strip()
+                    if retry_text:
+                        return EngineResponse(text=retry_text, provider=provider, model=model)
+            except Exception:
+                pass
             text = (
                 f"(她停頓了一下，低頭確認模型狀態) 模型已連接，但這次沒有產生正式回覆 content。"
                 f"\n模型：{model}"
                 f"\n結束原因：{finish_reason}"
-                f"\n診斷：若一直出現，請切換模型或調高輸出長度；目前後端 endpoint 是 {endpoint}。"
+                f"\n診斷：請切換非 reasoning 模型（如 Qwen-35B），或重試一次。"
             )
             if reasoning:
                 text += f"\n模型只輸出了 reasoning 片段：{reasoning[:180]}..."
@@ -206,10 +218,30 @@ async def generate_reply(
                 provider=model_choice.provider,
                 api_key=api_key,
             )
-        except Exception:
+        except Exception as e:
             if model_choice.kind != "local":
                 raise
-            return await call_cloud_llm(system_prompt, user_message)
+            # 本地模型失敗 → 檢查是否有雲端備援；若無則重試一次本地
+            cloud_url = os.getenv("CLOUD_API_URL", "").strip()
+            cloud_key = os.getenv("CLOUD_API_KEY", "").strip()
+            if cloud_url and cloud_key:
+                return await call_cloud_llm(system_prompt, user_message)
+            # 無雲端備援 → 重試一次本地模型（可能只是暫時超時）
+            try:
+                return await call_openai_compatible(
+                    system_prompt,
+                    user_message,
+                    base_url=model_choice.base_url,
+                    model=model_choice.model,
+                    provider=model_choice.provider,
+                    api_key=api_key,
+                )
+            except Exception:
+                return EngineResponse(
+                    text=f"(她微微蹙眉，指尖輕敲了兩下) 本地模型暫時無回應…再試一次好嗎？\n({type(e).__name__})",
+                    provider="local-retry-failed",
+                    model=model_choice.model,
+                )
 
     if prefer == "cloud":
         return await call_cloud_llm(system_prompt, user_message)
