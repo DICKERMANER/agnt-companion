@@ -168,6 +168,8 @@ async def generate_reply(
     user_message: str,
     prefer: str = "local",
     model_choice=None,
+    runtime_options: dict | None = None,
+    persona_profile: dict | None = None
 ) -> EngineResponse:
     if model_choice is not None:
         api_key = os.getenv(model_choice.api_key_env or "", "").strip() or None

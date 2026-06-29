@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,6 +30,7 @@ app.add_middleware(
 )
 
 CURRENT_MODEL_ID: str | None = None
+GLOBAL_PERSONA_OVERRIDE: dict | None = None
 
 
 class ChatRequest(BaseModel):
@@ -38,7 +39,7 @@ class ChatRequest(BaseModel):
     provider: str = Field(default="local")
     thinking_enabled: bool = False
     fast_mode: bool = False
-    reasoning_effort: str = "medium"
+    reasoning_effort: Literal["low", "medium", "high"] = "medium"
     action_prompt: Optional[str] = None
     persona_profile: Optional[dict] = None
 
@@ -51,6 +52,9 @@ class ChatResponse(BaseModel):
     diamonds_balance: int
     favorability_score: int
     relationship_stage: str
+    reasoning_effort: str | None = None
+    thinking_enabled: bool = False
+    fast_mode: bool = False
 
 
 class ModelSwitchRequest(BaseModel):
@@ -138,6 +142,17 @@ def set_model(payload: ModelSwitchRequest) -> dict:
     return {"current_model": serialize_current_model()}
 
 
+@app.post("/persona")
+def save_persona_profile(payload: dict) -> dict:
+    global GLOBAL_PERSONA_OVERRIDE
+    GLOBAL_PERSONA_OVERRIDE = payload
+    return {"status": "ok", "persona": payload}
+
+@app.get("/persona")
+def get_persona_profile() -> dict:
+    return {"persona": GLOBAL_PERSONA_OVERRIDE or {}}
+
+
 @app.post("/webhook/chat", response_model=ChatResponse)
 async def webhook_chat(payload: ChatRequest, db: Session = Depends(get_db)) -> ChatResponse:
     user, companion = get_or_create_user_bundle(db, payload.user_id)
@@ -153,6 +168,9 @@ async def webhook_chat(payload: ChatRequest, db: Session = Depends(get_db)) -> C
             diamonds_balance=user.diamonds_balance,
             favorability_score=companion.favorability_score,
             relationship_stage=companion.relationship_stage,
+            reasoning_effort=payload.reasoning_effort,
+            thinking_enabled=payload.thinking_enabled,
+            fast_mode=payload.fast_mode,
         )
 
     # 情緒評判 Hook
@@ -181,6 +199,12 @@ async def webhook_chat(payload: ChatRequest, db: Session = Depends(get_db)) -> C
         user_message,
         prefer=payload.provider,
         model_choice=model_choice,
+        runtime_options={
+            "thinking_enabled": payload.thinking_enabled,
+            "fast_mode": payload.fast_mode,
+            "reasoning_effort": payload.reasoning_effort
+        },
+        persona_profile=payload.persona_profile
     )
 
     return ChatResponse(
@@ -191,4 +215,7 @@ async def webhook_chat(payload: ChatRequest, db: Session = Depends(get_db)) -> C
         diamonds_balance=user.diamonds_balance,
         favorability_score=companion.favorability_score,
         relationship_stage=companion.relationship_stage,
+        reasoning_effort=payload.reasoning_effort,
+        thinking_enabled=payload.thinking_enabled,
+        fast_mode=payload.fast_mode,
     )

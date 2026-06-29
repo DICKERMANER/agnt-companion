@@ -108,7 +108,7 @@ def test_chat_injects_persona_and_runtime_options_without_real_llm() -> None:
                 "message": "hi",
                 "thinking_enabled": True,
                 "fast_mode": True,
-                "reasoning_effort": "max",
+                "reasoning_effort": "high",
                 "persona_profile": {
                     "name": "Mina",
                     "birthday": "2000-03-24",
@@ -117,6 +117,7 @@ def test_chat_injects_persona_and_runtime_options_without_real_llm() -> None:
                 },
             },
         )
+        assert_true(response.status_code == 200, f"chat should accept persona/runtime payload: {response.text}")
     finally:
         ai_engine.generate_reply = original
         main_module.generate_reply = original_main
@@ -124,7 +125,7 @@ def test_chat_injects_persona_and_runtime_options_without_real_llm() -> None:
     assert_true(response.status_code == 200, "chat should accept persona/runtime payload")
     data = response.json()
     assert_true(data["provider"] == "fake", "chat should use patched fake provider")
-    assert_true(data["reasoning_effort"] == "max", "response should echo max reasoning effort")
+    assert_true(data["reasoning_effort"] == "high", "response should echo max reasoning effort")
     assert_true(captured["runtime_options"]["fast_mode"] is True, "runtime options should reach AI engine")
     assert_true(captured["persona_profile"]["name"] == "Mina", "persona should reach AI engine")
     assert_true("Mina" in captured["system_prompt"], "persona name should be injected into prompt")
