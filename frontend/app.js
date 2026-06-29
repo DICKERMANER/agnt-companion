@@ -189,6 +189,7 @@ async function loadModels() {
   } catch (err) {
     const hint = !API_BASE ? "（⚠️ GitHub Pages 無法連線本地後端，請用 http://127.0.0.1:5500 測試）" : "請確認後端 8000 有啟動";
     currentModelLabel.textContent = "模型清單連線失敗";
+    modelButton.textContent = "⚡";
     if (modelList) modelList.innerHTML = `<div class="model-error">無法讀取 /models，${hint}。</div>`;
   }
 }
