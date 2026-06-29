@@ -71,7 +71,6 @@ class ModelSwitchRequest(BaseModel):
 
 
 class DiamondsSetRequest(BaseModel):
-    # 測試板：允許使用者自行輸入鑽石餘額。0~999999 之間。
     diamonds_balance: int = Field(..., ge=0, le=999999)
 
 
@@ -94,7 +93,6 @@ class SoulImportRequest(BaseModel):
 def on_startup() -> None:
     global CURRENT_MODEL_ID
     init_db()
-    # 自動選取第一個可用模型，避免前端載入時 /models.current_model 為 null
     if CURRENT_MODEL_ID is None:
         choices = get_model_choices()
         if choices:
@@ -146,7 +144,6 @@ def get_state(user_id: str, db: Session = Depends(get_db)) -> dict:
 
 @app.post("/state/{user_id}/diamonds")
 def set_diamonds(user_id: str, payload: DiamondsSetRequest, db: Session = Depends(get_db)) -> dict:
-    """測試板專用：使用者自行設定鑽石餘額。"""
     user, companion = get_or_create_user_bundle(db, user_id)
     user.diamonds_balance = payload.diamonds_balance
     db.add(user)
@@ -214,7 +211,6 @@ def upsert_soul(payload: SoulSaveRequest) -> dict:
 
 @app.post("/souls/import")
 def import_soul_markdown(payload: SoulImportRequest) -> dict:
-    """Import a raw Soul.md document (with YAML frontmatter) as a new/updated soul."""
     soul = save_soul_markdown(payload.id, payload.markdown)
     return {"status": "ok", "soul": {"id": soul.id, "name": soul.name, "birthday": soul.birthday}}
 
@@ -260,7 +256,6 @@ async def webhook_chat(payload: ChatRequest, db: Session = Depends(get_db)) -> C
     user, companion = get_or_create_user_bundle(db, payload.user_id)
     model_choice = get_current_model_choice()
 
-    # 付費鎖：每聊一句先扣 1 鑽，餘額不足直接攔截
     if not consume_one_diamond(db, user):
         return ChatResponse(
             reply=INSUFFICIENT_BALANCE_MESSAGE,
@@ -275,7 +270,6 @@ async def webhook_chat(payload: ChatRequest, db: Session = Depends(get_db)) -> C
             fast_mode=payload.fast_mode,
         )
 
-    # 情緒評判 Hook
     sentiment = analyze_sentiment(payload.message)
     companion.favorability_score = max(0, min(100, companion.favorability_score + sentiment_delta(sentiment)))
     companion.relationship_stage = map_relationship_stage(companion.favorability_score)
@@ -283,7 +277,6 @@ async def webhook_chat(payload: ChatRequest, db: Session = Depends(get_db)) -> C
     db.commit()
     db.refresh(companion)
 
-    # 動態 Prompt 注入
     active_soul = get_soul(companion.soul_id)
     system_prompt = build_dynamic_system_prompt(companion.relationship_stage, active_soul)
     user_message = payload.message
@@ -326,3 +319,8 @@ async def webhook_chat(payload: ChatRequest, db: Session = Depends(get_db)) -> C
         fast_mode=payload.fast_mode,
         avatar=active_soul.avatar,
     )
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=8002, log_level="info")

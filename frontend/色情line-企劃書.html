@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>色情line — Beta 企劃書 v1.0</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI','Microsoft JhengHei',sans-serif;background:#0a0a0a;color:#e0e0e0;line-height:1.8}
+.page{max-width:900px;margin:0 auto;padding:40px 30px;background:#111}
+h1{font-size:2.4em;color:#ff4d6a;text-align:center;margin:30px 0 10px;letter-spacing:2px}
+.subtitle{text-align:center;color:#888;font-size:1.1em;margin-bottom:20px}
+.tagline{text-align:center;color:#ff6b81;font-size:1.3em;font-weight:bold;margin:20px 0 40px;padding:15px;border-top:1px solid #333;border-bottom:1px solid #333}
+h2{color:#ff4d6a;font-size:1.5em;margin:40px 0 16px;padding-bottom:8px;border-bottom:2px solid #ff4d6a33}
+h3{color:#ff6b81;font-size:1.15em;margin:20px 0 10px}
+.badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:.8em;font-weight:bold;margin-left:10px}
+.bg{background:#1a3a2a;color:#4ade80}
+.by{background:#3a2a1a;color:#fbbf24}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.9em}
+th{background:#1a1a1a;color:#ff6b81;padding:10px 14px;text-align:left;border-bottom:2px solid #333}
+td{padding:10px 14px;border-bottom:1px solid #222}
+tr:hover td{background:#1a1a1a}
+.card{background:#1a1a1a;border-radius:10px;padding:20px;border:1px solid #2a2a2a;margin:20px 0}
+.card h4{color:#ff4d6a;margin-bottom:8px}
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;margin:16px 0}
+.kpi{text-align:center;font-size:2em;font-weight:bold;color:#ff4d6a}
+.kpi-label{text-align:center;color:#888;font-size:.85em}
+.footer{text-align:center;color:#555;font-size:.8em;margin-top:60px;padding-top:20px;border-top:1px solid #222}
+.cta{background:linear-gradient(135deg,#ff4d6a,#ff6b81);color:#fff;text-align:center;padding:20px;border-radius:12px;margin:30px 0;font-size:1.2em;font-weight:bold}
+ul{padding-left:24px;color:#bbb}
+li{margin-bottom:6px}
+svg text{font-family:'Segoe UI','Microsoft JhengHei',sans-serif}
+@media print{body{background:#fff;color:#222}.page{background:#fff}th{background:#eee;color:#c0392b}.card{background:#f8f8f8;border-color:#ddd}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>🔥 色情line</h1>
+<div class="subtitle">Beta 階段企劃書 · v1.0 · 2026 年 6 月 30 日</div>
+<div class="tagline">「台灣第一個超擬真 AI 成人伴侶 LINE 風格聊天 App」</div>
+
+<h2>🔍 員工活動檢查報告</h2>
+
+<table>
+<tr><th style="width:170px">檢查項目</th><th style="width:100px">結果</th><th>詳情</th></tr>
+<tr><td>其他 Hermes Session</td><td><span class="badge bg">✅ 無</span></td><td>僅此 session (20260630) 在操作本專案</td></tr>
+<tr><td>Git 分支</td><td><span class="badge bg">✅ 僅 master</span></td><td>無其他分支活躍，無合併衝突風險</td></tr>
+<tr><td>最近 5 次 commit</td><td><span class="badge by">⚠️ 全 bot</span></td><td>全部由 Hermes Agent &lt;bot@hermes.local&gt; 提交</td></tr>
+<tr><td>未提交變更</td><td><span class="badge by">⚠️ 7 檔案</span></td><td>ai_engine.py, main.py, app.js, index.html, styles.css, souls/*</td></tr>
+<tr><td>未追蹤檔案</td><td><span class="badge by">⚠️ 5 個</span></td><td>AGNT-architecture.html, deploy/, souls/e2e.md 等</td></tr>
+<tr><td>Cron Job</td><td><span class="badge bg">✅ 無</span></td><td>無排程任務在背景操作程式碼</td></tr>
+<tr><td>GitHub 外部貢獻</td><td><span class="badge bg">✅ 無</span></td><td>DICKERMANER 個人 repo，無 collaborator</td></tr>
+<tr><td>手機端修改可能</td><td><span class="badge bg">✅ 無</span></td><td>手機僅為測試瀏覽端，無編輯能力</td></tr>
+</table>
+
+<div class="card"><h4>📌 結論</h4><p>✅ <strong>無其他員工 / 對話視窗 / 手機端正在同時修改程式碼。</strong>所有變更均來自本對話。7 個檔案有未提交修改，建議企劃完成後立即 commit。</p></div>
+
+<h2>1. 產品概述</h2>
+<table>
+<tr><th style="width:140px">項目</th><th>說明</th></tr>
+<tr><td>產品名稱</td><td><strong>色情line</strong>（AGNT Cyber Companion）</td></tr>
+<tr><td>定位</td><td>台灣第一款超擬真 AI 成人伴侶 LINE 風格聊天 App</td></tr>
+<tr><td>目標</td><td>台灣 18-45 歲男性，寂寞經濟 + 成人娛樂市場</td></tr>
+<tr><td>版本</td><td>v0.2.0 Beta</td></tr>
+<tr><td>GitHub</td><td>https://github.com/DICKERMANER/agnt-companion</td></tr>
+<tr><td>GitHub Pages</td><td>https://dickermaner.github.io/agnt-companion/</td></tr>
+<tr><td>本地前端</td><td>http://127.0.0.1:5500</td></tr>
+<tr><td>本地後端</td><td>http://127.0.0.1:8002</td></tr>
+<tr><td>手機測試</td><td>http://192.168.31.13:5500</td></tr>
+<tr><td>公開隧道</td><td>Cloudflare Tunnel（動態網址）</td></tr>
+</table>
+
+<h2>2. 技術架構</h2>
+<svg viewBox="0 0 850 220" style="width:100%;max-width:850px;margin:10px 0">
+  <rect width="100%" height="100%" fill="#0d0d0d" rx="8"/>
+  <rect x="20" y="60" width="100" height="100" rx="8" fill="#1a1a2e" stroke="#e94560" stroke-width="1.5"/>
+  <text x="70" y="105" fill="#e94560" font-size="20" text-anchor="middle">📱</text>
+  <text x="70" y="125" fill="white" font-size="11" text-anchor="middle">用戶端</text>
+  <text x="70" y="142" fill="#888" font-size="8" text-anchor="middle">電腦/手機</text>
+  <rect x="160" y="60" width="140" height="100" rx="8" fill="#0d1b2a" stroke="#22d3ee" stroke-width="1.5"/>
+  <text x="230" y="100" fill="#22d3ee" font-size="12" text-anchor="middle">前端 :5500</text>
+  <text x="230" y="120" fill="#aaa" font-size="9" text-anchor="middle">HTML/CSS/JS</text>
+  <text x="230" y="138" fill="#aaa" font-size="9" text-anchor="middle">LINE 風格 UI</text>
+  <rect x="340" y="60" width="150" height="100" rx="8" fill="#0a1f1a" stroke="#34d399" stroke-width="1.5"/>
+  <text x="415" y="100" fill="#34d399" font-size="12" text-anchor="middle">後端 :8002</text>
+  <text x="415" y="120" fill="#aaa" font-size="9" text-anchor="middle">FastAPI 14 端點</text>
+  <text x="415" y="138" fill="#aaa" font-size="9" text-anchor="middle">SQLite DB</text>
+  <rect x="530" y="60" width="140" height="100" rx="8" fill="#1a0a2e" stroke="#a78bfa" stroke-width="1.5"/>
+  <text x="600" y="100" fill="#a78bfa" font-size="12" text-anchor="middle">AI 引擎</text>
+  <text x="600" y="120" fill="#aaa" font-size="9" text-anchor="middle">Ollama 本地</text>
+  <text x="600" y="138" fill="#aaa" font-size="9" text-anchor="middle">OpenRouter/Gemini</text>
+  <rect x="710" y="60" width="120" height="100" rx="8" fill="#2a1a0a" stroke="#fbbf24" stroke-width="1.5"/>
+  <text x="770" y="100" fill="#fbbf24" font-size="12" text-anchor="middle">💾 儲存</text>
+  <text x="770" y="120" fill="#aaa" font-size="9" text-anchor="middle">SQLite</text>
+  <text x="770" y="138" fill="#aaa" font-size="9" text-anchor="middle">Souls .md</text>
+  <line x1="120" y1="110" x2="158" y2="110" stroke="#e94560" stroke-width="1.5"/>
+  <line x1="300" y1="110" x2="338" y2="110" stroke="#22d3ee" stroke-width="1.5"/>
+  <line x1="490" y1="110" x2="528" y2="110" stroke="#34d399" stroke-width="1.5"/>
+  <line x1="670" y1="110" x2="708" y2="110" stroke="#a78bfa" stroke-width="1.5"/>
+  <rect x="160" y="180" width="200" height="28" rx="6" fill="#1a1a1a" stroke="#fbbf24" stroke-width="1"/>
+  <text x="260" y="199" fill="#fbbf24" font-size="9" text-anchor="middle">GitHub Pages: dickermaner.github.io</text>
+  <rect x="530" y="180" width="180" height="28" rx="6" fill="#1a1a1a" stroke="#fbbf24" stroke-width="1"/>
+  <text x="620" y="199" fill="#fbbf24" font-size="9" text-anchor="middle">Cloudflare Tunnel</text>
+</svg>
+
+<h2>3. 功能現況 vs 目標</h2>
+<table>
+<tr><th>功能</th><th>現況</th><th>Beta</th><th>v1.0 目標</th></tr>
+<tr><td>💬 文字聊天</td><td><span class="badge bg">✅</span></td><td>90%</td><td>多模型智慧切換</td></tr>
+<tr><td>🎭 角色系統</td><td><span class="badge bg">✅</span></td><td>85%</td><td>角色商城 + 社群分享</td></tr>
+<tr><td>💎 鑽石計費</td><td><span class="badge bg">✅</span></td><td>80%</td><td>金流串接 + VIP 訂閱</td></tr>
+<tr><td>❤️ 好感系統</td><td><span class="badge bg">✅</span></td><td>85%</td><td>解鎖劇情 + 瑟瑟分級</td></tr>
+<tr><td>📷 拍照上傳</td><td><span class="badge by">🆕</span></td><td>40%</td><td>AI 圖片辨識回應</td></tr>
+<tr><td>🎨 貼圖系統</td><td><span class="badge by">🆕</span></td><td>30%</td><td>角色專屬貼圖包</td></tr>
+<tr><td>📎 檔案上傳</td><td><span class="badge by">🆕</span></td><td>20%</td><td>文檔 + 圖片 + 影片</td></tr>
+<tr><td>🎤 語音錄製</td><td><span class="badge by">🆕</span></td><td>15%</td><td>語音輸入 + 語音回覆</td></tr>
+<tr><td>📞 語音通話</td><td><span class="badge by">❌</span></td><td>0%</td><td>WebRTC 即時語音</td></tr>
+</table>
+
+<h2>4. 💰 收益最大化路線圖</h2>
+
+<div class="card-grid">
+<div class="card">
+<h4>🌟 VIP 訂閱制</h4>
+<p style="color:#ccc;font-size:.9em">月費 NT$299 無限聊（限普通模式）<br>高級 VIP NT$999/月 含瑟瑟全解鎖<br>年費 NT$2,999 送專屬角色</p>
+<p style="color:#4ade80;font-size:.85em;margin-top:8px">預估 ARPU: NT$299-999/月</p>
+</div>
+<div class="card">
+<h4>🔥 瑟瑟分級解鎖</h4>
+<p style="color:#ccc;font-size:.9em">普通聊天免費（吸用戶）<br>18+ 成人模式扣 3-5 鑽/條<br>特殊場景/劇情包定價 NT$150-490</p>
+<p style="color:#4ade80;font-size:.85em;margin-top:8px">轉換率預估: 40-60%</p>
+</div>
+<div class="card">
+<h4>👗 角色商城</h4>
+<p style="color:#ccc;font-size:.9em">角色服裝 NT$50-150<br>語音包 NT$99-299<br>專屬場景 NT$199<br>限定聯名角色 NT$490</p>
+<p style="color:#4ade80;font-size:.85em;margin-top:8px">單用戶 Lifetime Value +200%</p>
+</div>
+<div class="card">
+<h4>🎤 語音通話</h4>
+<p style="color:#ccc;font-size:.9em">AI 語音通話 5 鑽/分鐘<br>高級角色 10 鑽/分鐘<br>視訊通話 15 鑽/分鐘</p>
+<p style="color:#4ade80;font-size:.85em;margin-top:8px">最高利潤產品線</p>
+</div>
+<div class="card">
+<h4>💌 創作者經濟</h4>
+<p style="color:#ccc;font-size:.9em">使用者自訂角色上架<br>平台抽成 30%<br>熱門創作者分潤</p>
+<p style="color:#4ade80;font-size:.85em;margin-top:8px">UGC 生態，零庫存成本</p>
+</div>
+<div class="card">
+<h4>📢 廣告 + 聯盟</h4>
+<p style="color:#ccc;font-size:.9em">成人用品聯盟行銷<br>約會 App 導流<br>成人內容平台合作</p>
+<p style="color:#4ade80;font-size:.85em;margin-top:8px">被動收入疊加</p>
+</div>
+</div>
+
+<h2>5. 營收試算</h2>
+<table>
+<tr><th>情境</th><th>用戶數</th><th>付費率</th><th>月營收</th><th>年營收</th></tr>
+<tr><td>🐣 冷啟動</td><td>1,000</td><td>5%</td><td>NT$15,000</td><td>NT$180,000</td></tr>
+<tr><td>📈 成長期</td><td>10,000</td><td>10%</td><td>NT$300,000</td><td>NT$3,600,000</td></tr>
+<tr><td>🚀 規模化</td><td>50,000</td><td>15%</td><td>NT$2,250,000</td><td>NT$27,000,000</td></tr>
+<tr><td>🔥 台灣 Top 1</td><td>200,000</td><td>20%</td><td>NT$12,000,000</td><td>NT$144,000,000</td></tr>
+</table>
+<p style="color:#888;font-size:.85em;margin-top:8px">* 以 ARPU NT$300/月估算，含鑽石加購、商城、語音通話等收入疊加</p>
+
+<h2>6. Beta → v1.0 開發路線</h2>
+<div class="timeline">
+<div class="tl-item">
+<div class="tl-date">2026 年 6 月（現在）</div>
+<div class="tl-content"><strong>Beta v0.2.0</strong> — 文字聊天完成、角色系統、鑽石計費、好感系統、AI 多模型支援。Bug 修復完成，本地模型穩定運行。</div>
+</div>
+<div class="tl-item">
+<div class="tl-date">2026 年 7 月</div>
+<div class="tl-content"><strong>Beta v0.3.0</strong> — 貼圖系統完成、拍照上傳、檔案上傳、LINE 風格 UI 完整化、手機端最佳化、路由 AP 隔離測試</div>
+</div>
+<div class="tl-item">
+<div class="tl-date">2026 年 8 月</div>
+<div class="tl-content"><strong>Beta v0.4.0</strong> — 語音錄製/播放、瑟瑟分級系統、VIP 訂閱機制、金流串接（藍新/綠界）</div>
+</div>
+<div class="tl-item">
+<div class="tl-date">2026 年 9 月</div>
+<div class="tl-content"><strong>Beta v0.5.0</strong> — 角色商城上線、語音通話 WebRTC、後台管理面板、封測招募 100 人</div>
+</div>
+<div class="tl-item">
+<div class="tl-date">2026 年 10 月</div>
+<div class="tl-content"><strong>v1.0 正式版</strong> — 公開上線、行銷推廣、創作者經濟開放、台灣市場正式發佈 🎉</div>
+</div>
+</div>
+
+<div class="cta">
+🚀 下一步：立即 commit 所有修改 → 部署 → 完成貼圖/拍照功能 → 開始封測招募
+</div>
+
+<div class="footer">
+色情line（AGNT Cyber Companion SaaS）· Beta 企劃書 v1.0 · 2026 年 6 月 30 日<br>
+GitHub: DICKERMANER/agnt-companion · 機密文件 — 僅供內部使用
+</div>
+
+</div>
+</body>
+</html>
+

@@ -90,6 +90,7 @@ async def call_openai_compatible(
     model: str,
     provider: str,
     api_key: str | None = None,
+    runtime_options: dict | None = None,
 ) -> EngineResponse:
     endpoint = f"{base_url.rstrip('/')}/chat/completions"
     if not endpoint.endswith("/v1/chat/completions") and "/v1/" not in endpoint:
@@ -103,6 +104,14 @@ async def call_openai_compatible(
         ],
         "temperature": 0.85,
     }
+    # 將 runtime_options 注入 payload
+    if runtime_options:
+        if runtime_options.get("thinking_enabled"):
+            payload["thinking"] = {"type": "enabled"}
+        if runtime_options.get("fast_mode"):
+            payload["max_tokens"] = 256
+        if runtime_options.get("reasoning_effort"):
+            payload["reasoning_effort"] = runtime_options["reasoning_effort"]
     headers = {"Content-Type": "application/json"}
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
@@ -116,6 +125,9 @@ async def call_openai_compatible(
         if not text:
             reasoning = (message.get("reasoning") or "").strip()
             finish_reason = data.get("choices", [{}])[0].get("finish_reason", "unknown")
+            # Qwen reasoning 模型：content 為空但 reasoning 有內容 → 直接用 reasoning 當回覆
+            if reasoning:
+                return EngineResponse(text=reasoning, provider=provider, model=model)
             # 有些 Ollama / reasoning 模型會只吐 reasoning、不吐 content；前後端看起來就像「按鈕沒反應」。
             # 這裡自動重試一次，加上 max_tokens 強制模型吐出 content。
             retry_payload = {**payload, "max_tokens": 512}
@@ -217,10 +229,23 @@ async def generate_reply(
                 model=model_choice.model,
                 provider=model_choice.provider,
                 api_key=api_key,
+                runtime_options=runtime_options,
             )
         except Exception as e:
             if model_choice.kind != "local":
-                raise
+                # API 模型失敗（429 / 超時 / key 無效等）→ 不回傳崩潰，改回傳友善錯誤訊息
+                err_msg = str(e)
+                if "429" in err_msg:
+                    hint = "模型暫時被限流（429），請稍後重試或切換其他模型。"
+                elif "401" in err_msg or "403" in err_msg:
+                    hint = "API key 無效或權限不足，請檢查環境變數。"
+                else:
+                    hint = f"API 模型呼叫失敗：{type(e).__name__}"
+                return EngineResponse(
+                    text=f"(她微微蹙眉，指尖輕敲了兩下) {hint}",
+                    provider=f"{model_choice.provider}-error",
+                    model=model_choice.model,
+                )
             # 本地模型失敗 → 檢查是否有雲端備援；若無則重試一次本地
             cloud_url = os.getenv("CLOUD_API_URL", "").strip()
             cloud_key = os.getenv("CLOUD_API_KEY", "").strip()
