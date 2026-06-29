@@ -1,20 +1,26 @@
 // --- 自動偵測 API 端點 ---
-// 本地開發 → localhost backend；GitHub Pages → 需設定 PRODUCTION_BACKEND_URL
+// 本地開發 → localhost backend；同網域裝置 → 同 IP port 8000；GitHub Pages → 引導使用本地測試
 const _host = location.hostname;
-const _isLocal = _host === "127.0.0.1" || _host === "localhost" || _host === "0.0.0.0";
-const API_BASE = _isLocal
+const _isLoopback = _host === "127.0.0.1" || _host === "localhost" || _host === "0.0.0.0" || _host === "[::1]";
+
+// 判斷是否為私有 IP（區網內）：10.x.x.x, 172.16-31.x.x, 192.168.x.x
+const _isPrivateIP = /^(10\.\d{1,3}\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/.test(_host);
+
+const API_BASE = _isLoopback
   ? "http://127.0.0.1:8000"
-  : (window.CYBER_COMPANION_BACKEND || "");  // GitHub Pages 需在 HTML 設定或留空顯示提示
+  : _isPrivateIP
+    ? `http://${_host}:8000`   // 同網域內的手機/平板自動指向同一台電腦的後端
+    : (window.CYBER_COMPANION_BACKEND || "");  // GitHub Pages 需在 HTML 設定
 
 const USER_ID = "demo_user";
 
-// GitHub Pages 無後端時顯示醒目提示（立即執行，不等 DOMContentLoaded）
+// 無後端時顯示醒目提示（立即執行，不等 DOMContentLoaded）
 (function showBackendWarning() {
-  if (_isLocal || API_BASE) return;
+  if (_isLoopback || _isPrivateIP || API_BASE) return;
   const banner = document.createElement("div");
   banner.id = "backend-warning";
   banner.style.cssText = "background:#ff9800;color:#000;padding:10px 16px;text-align:center;font-size:14px;font-weight:600;position:sticky;top:0;z-index:9999";
-  banner.textContent = "⚠️ 未設定後端 API。請啟動本地伺服器並改用 http://127.0.0.1:5500 測試，或設定 CYBER_COMPANION_BACKEND 指向公開後端。";
+  banner.textContent = "⚠️ GitHub Pages 無法連線本地後端。請在電腦瀏覽器開啟 http://127.0.0.1:5500 測試，或用手機連同一 WiFi 開啟 http://192.168.31.13:5500";
   if (document.body) {
     document.body.prepend(banner);
   } else {
