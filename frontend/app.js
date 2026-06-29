@@ -320,11 +320,18 @@ async function sendMessage(overridePayload = null) {
   pendingActionPrompt = "";
 
   try {
+    // 設定 120s timeout（本地模型推理 + tunnel 延遲）
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000);
+    
     const res = await fetch(`${API_BASE}/webhook/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
+    
     if (!res.ok) {
       const errorBody = await res.json().catch(() => ({}));
       throw new Error(errorBody.detail ? JSON.stringify(errorBody.detail) : `HTTP ${res.status}`);
