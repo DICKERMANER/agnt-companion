@@ -35,6 +35,7 @@ function testQuickActionParticles() {
   assert(index.includes('id="fxLayer"'), 'index.html should contain #fxLayer for visual effects');
   assert(css.includes('.fx-particle'), 'styles.css should style .fx-particle');
   assert(app.includes('spawnParticles'), 'app.js should implement spawnParticles');
+  assert(app.includes('.line-quick-actions button'), 'quick action click handler should target the canonical .line-quick-actions selector');
   assert(app.includes('btn.addEventListener("click"'), 'quick action click handler should exist');
   assert(app.includes('spawnParticles(btn'), 'quick action click should spawn particles from clicked button');
   assert(app.includes('sendQuickAction'), 'quick action buttons should trigger an actual chat action');
@@ -50,10 +51,30 @@ function testPersonaHaremUi() {
   assert(index.includes('id="savePersona"'), 'persona form should include save button');
   assert(css.includes('.persona-panel'), 'styles.css should style persona panel');
   assert(css.includes('.persona-form'), 'styles.css should style persona form');
-  assert(app.includes('loadPersona'), 'app.js should load persona profile');
-  assert(app.includes('savePersona'), 'app.js should save persona profile');
+  assert(app.includes('loadActivePersonaIntoForm'), 'app.js should load the active persona profile into the form');
+  assert(app.includes('async function savePersona'), 'app.js should save persona profile');
   assert(app.includes('/persona'), 'app.js should call persona endpoint');
   assert(app.includes('persona_profile'), 'chat payload should include persona_profile');
+
+  const savePersonaBody = getFunctionBody(app, 'savePersona');
+  assert(savePersonaBody.includes('method: "POST"') && savePersonaBody.includes('body: JSON.stringify'),
+    'savePersona should POST an actual JSON body, not an empty request');
+}
+
+function testSoulHaremManagement() {
+  assert(index.includes('id="soulList"'), 'index.html should include a soul harem list container');
+  assert(index.includes('id="newSoulBtn"'), 'index.html should include a button to start a new soul');
+  assert(index.includes('id="importSoulBtn"'), 'index.html should include a Soul.md import button');
+  assert(index.includes('id="exportSoulBtn"'), 'index.html should include a Soul.md export button');
+  assert(index.includes('id="importSoulFile"'), 'index.html should include a hidden file input for import');
+  assert(css.includes('.soul-list'), 'styles.css should style the soul harem list');
+  assert(css.includes('.soul-chip'), 'styles.css should style individual soul chips');
+  assert(app.includes('async function loadSoulsList'), 'app.js should fetch the saved souls list');
+  assert(app.includes('async function selectSoul'), 'app.js should support selecting a saved soul');
+  assert(app.includes('/souls'), 'app.js should call the /souls endpoint');
+  assert(app.includes('/souls/import'), 'app.js should call the /souls/import endpoint');
+  assert(app.includes('async function exportSoul') || app.includes('function exportSoul'),
+    'app.js should support exporting the current soul as Soul.md');
 }
 
 function testFavorStageTransition() {
@@ -105,6 +126,7 @@ const tests = [
   testTypingIndicatorMarkupAndLogic,
   testQuickActionParticles,
   testPersonaHaremUi,
+  testSoulHaremManagement,
   testFavorStageTransition,
   testLineStyleShell,
   testModelSwitcherUi,

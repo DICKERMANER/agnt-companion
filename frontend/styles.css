@@ -400,12 +400,30 @@ progress {
 
 .msg-row {
   display: flex;
+  gap: 8px;
+  max-width: 90%;
+}
+.msg-row.user { align-self: flex-end; flex-direction: row-reverse; }
+.msg-row.ai { align-self: flex-start; }
+
+.msg-bubble-wrapper {
+  display: flex;
   flex-direction: column;
   gap: 3px;
-  max-width: 82%;
+  max-width: 100%;
 }
-.msg-row.user { align-self: flex-end; align-items: flex-end; }
-.msg-row.ai { align-self: flex-start; align-items: flex-start; }
+
+.msg-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #fff4c2, #c02a78 70%);
+  flex-shrink: 0;
+  font-size: 18px;
+  margin-top: 4px;
+}
 
 .msg {
   position: relative;
@@ -590,6 +608,27 @@ progress {
 .persona-panel {
   background: #fdfdfd;
 }
+.soul-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 4px 0 14px;
+}
+.soul-chip {
+  border: 1px solid rgba(6,199,85,.3);
+  border-radius: 999px;
+  padding: 7px 14px;
+  background: #fff;
+  color: var(--line-green-dark);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+.soul-chip.active {
+  background: var(--line-green);
+  color: #fff;
+  border-color: var(--line-green);
+}
 .persona-form {
   display: flex;
   flex-direction: column;
@@ -601,6 +640,37 @@ progress {
   border-radius: 12px;
   padding: 10px;
   font-family: inherit;
+}
+.persona-avatar-row {
+  display: flex;
+  gap: 8px;
+}
+.persona-avatar-row input {
+  flex: 1;
+}
+.persona-avatar-row button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.persona-soul-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ghost-btn {
+  flex: 1 1 auto;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 9px 10px;
+  background: #fff;
+  color: #374151;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+.ghost-btn:hover {
+  border-color: var(--line-green-dark);
+  color: var(--line-green-dark);
 }
 .primary-btn {
   background: var(--line-green);

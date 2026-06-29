@@ -5,6 +5,7 @@ __pycache__/
 
 # DB
 *.db
+backend/persona_profiles.json
 
 # Env
 .env

@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="CyberCompanion" />
+    <meta name="apple-mobile-web-app-title" content="自定義AGNT虛擬AI伴侶" />
     <link rel="manifest" href="./manifest.json" />
     <link rel="stylesheet" href="./styles.css" />
-    <title>Cyber Companion LINE Mode</title>
+    <title>自定義AGNT虛擬AI伴侶（可以瑟瑟）</title>
   </head>
   <body>
     <div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
@@ -55,16 +55,34 @@
       <aside class="model-panel persona-panel" aria-label="人格自訂">
         <div class="model-panel-header">
           <div>
-            <div class="model-panel-title">自訂角色 (Soul)</div>
-            <div class="model-panel-subtitle">建立或修改你的專屬陪伴靈魂</div>
+            <div class="model-panel-title">人格後宮 (Persona Harem)</div>
+            <div class="model-panel-subtitle">建立、切換或修改你的專屬陪伴靈魂</div>
           </div>
           <button id="closePersonaDrawer" class="icon-button" type="button">✕</button>
         </div>
+
+        <div id="soulList" class="soul-list" aria-label="已儲存的角色"></div>
+
         <div class="persona-form">
-          <input type="text" id="personaName" placeholder="角色名稱 (e.g. 朴彩英)" />
-          <input type="text" id="personaBirthday" placeholder="生日/星座 (e.g. 1997-02-11 水瓶座)" />
-          <textarea id="personaSoul" rows="5" placeholder="性格核心設定 (e.g. 精緻高雅、冷艷...)"></textarea>
-          <button id="savePersona" type="button" class="primary-btn">儲存人格</button>
+          <input type="text" id="personaName" placeholder="角色名稱 (e.g. 星野 Nova)" />
+          <input type="text" id="personaBirthday" placeholder="生日/星座 (e.g. 1999-08-19 獅子座)" />
+          <div class="persona-avatar-row">
+            <input type="hidden" id="personaAvatar" />
+            <button id="uploadAvatarBtn" type="button" class="ghost-btn">上傳頭貼</button>
+            <input type="file" id="avatarUploadFile" accept="image/*" hidden />
+            <div id="avatarPreview" class="avatar-preview">👑</div>
+            <button id="avatarAiPromptBtn" type="button" class="ghost-btn" data-action="換頭像：請切換成新的造型並描述細節。">AI 換頭像</button>
+          </div>
+          <textarea id="personaSoul" rows="6" placeholder="Soul.md 性格核心設定，可貼上完整人格描述..."></textarea>
+
+          <div class="persona-soul-actions">
+            <button id="newSoulBtn" type="button" class="ghost-btn">＋ 新建角色</button>
+            <button id="importSoulBtn" type="button" class="ghost-btn">匯入 Soul.md</button>
+            <button id="exportSoulBtn" type="button" class="ghost-btn">匯出 Soul.md</button>
+            <input type="file" id="importSoulFile" accept=".md,text/markdown" hidden />
+          </div>
+
+          <button id="savePersona" type="button" class="primary-btn">儲存靈魂</button>
         </div>
       </aside>
     </div>
@@ -72,9 +90,9 @@
     <div class="line-app-shell">
       <header class="line-chat-header">
         <button class="icon-button" type="button" aria-label="返回">‹</button>
-        <div class="avatar">👑</div>
+        <div class="avatar" id="headerAvatar">👑</div>
         <div class="chat-title-block">
-          <div class="chat-title">王室風格陪伴引擎</div>
+          <div class="chat-title">自定義AGNT虛擬AI伴侶（可以瑟瑟）</div>
           <div class="chat-subtitle">
             <span id="currentModelLabel">模型載入中...</span>
             <span class="dot-separator">·</span>
@@ -102,7 +120,6 @@
       </main>
 
       <section class="quick-actions line-quick-actions">
-        <button data-action="換頭像：請切換成新的造型並描述細節。">換頭像</button>
         <button data-action="拍拍肩：給我溫柔安撫與鼓勵。">拍拍肩</button>
         <button data-action="換場景：切換到新的沉浸式場景。">換場景</button>
         <button data-action="給予否定：請表現低落與需要被理解的情緒。">否定</button>

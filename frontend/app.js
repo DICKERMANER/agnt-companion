@@ -24,8 +24,20 @@ const closePersonaDrawerBtn = document.getElementById("closePersonaDrawer");
 const personaDrawer = document.getElementById("personaDrawer");
 const personaDrawerBackdrop = document.getElementById("personaDrawerBackdrop");
 const savePersonaBtn = document.getElementById("savePersona");
+const soulListEl = document.getElementById("soulList");
+const newSoulBtn = document.getElementById("newSoulBtn");
+const importSoulBtn = document.getElementById("importSoulBtn");
+const importSoulFile = document.getElementById("importSoulFile");
+const exportSoulBtn = document.getElementById("exportSoulBtn");
+const personaNameInput = document.getElementById("personaName");
+const personaBirthdayInput = document.getElementById("personaBirthday");
+const personaAvatarInput = document.getElementById("personaAvatar");
+const personaSoulInput = document.getElementById("personaSoul");
+const headerAvatar = document.getElementById("headerAvatar");
 
 let currentPersonaProfile = null;
+let currentSoulId = null;
+let souls = [];
 let pendingActionPrompt = "";
 let modelRuntimeOptions = {
   thinking_enabled: false,
@@ -45,22 +57,47 @@ const STAGE_LABELS = {
   lover: "熱戀陪伴期",
 };
 
-function appendMessage(role, text, meta = "") {
+function updateAvatarDisplay(avatarValue) {
+  const val = avatarValue || "👑";
+  if (val.startsWith("http") || val.startsWith("data:")) {
+    headerAvatar.innerHTML = `<img src="${val}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+  } else {
+    headerAvatar.textContent = val;
+  }
+}
+
+function appendMessage(role, text, meta = "", avatarValue = null) {
   const row = document.createElement("div");
   row.className = `msg-row ${role}`;
+
+  if (role === "ai") {
+    const avatarEl = document.createElement("div");
+    avatarEl.className = "msg-avatar";
+    const val = avatarValue || currentPersonaProfile?.avatar || "👑";
+    if (val.startsWith("http") || val.startsWith("data:")) {
+      avatarEl.innerHTML = `<img src="${val}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+    } else {
+      avatarEl.textContent = val;
+    }
+    row.appendChild(avatarEl);
+  }
+
+  const bubbleWrapper = document.createElement("div");
+  bubbleWrapper.className = "msg-bubble-wrapper";
 
   const bubble = document.createElement("div");
   bubble.className = `msg ${role}`;
   bubble.textContent = text;
+  bubbleWrapper.appendChild(bubble);
 
-  row.appendChild(bubble);
   if (meta) {
     const metaEl = document.createElement("div");
     metaEl.className = "msg-meta";
     metaEl.textContent = meta;
-    row.appendChild(metaEl);
+    bubbleWrapper.appendChild(metaEl);
   }
 
+  row.appendChild(bubbleWrapper);
   chatWindow.insertBefore(row, typingIndicator || null);
   chatWindow.scrollTop = chatWindow.scrollHeight;
 }
@@ -194,6 +231,31 @@ async function loadState() {
   }
 }
 
+// 測試板：點擊鑽石餘額可手動輸入要設定的數量。
+async function promptSetDiamonds() {
+  const current = (diamondsBalance.textContent || "").trim();
+  const input = window.prompt("測試板：請輸入鑽石餘額 (0~999999)", current === "--" ? "100" : current);
+  if (input === null) return;
+  const value = parseInt(input.trim(), 10);
+  if (Number.isNaN(value) || value < 0 || value > 999999) {
+    appendSystemChip("⚠️ 鑽石數量需為 0~999999 的整數");
+    return;
+  }
+  try {
+    const res = await fetch(`${API_BASE}/state/${USER_ID}/diamonds`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ diamonds_balance: value })
+    });
+    if (!res.ok) throw new Error("set diamonds failed");
+    const data = await res.json();
+    setState(data);
+    appendSystemChip(`💎 已設定鑽石餘額：${data.diamonds_balance}`);
+  } catch (err) {
+    appendSystemChip("⚠️ 設定鑽石失敗，請確認後端服務");
+  }
+}
+
 function syncModelRuntimeControls() {
   modelRuntimeOptions = {
     thinking_enabled: document.getElementById("thinkingToggle")?.checked || false,
@@ -205,6 +267,8 @@ function syncModelRuntimeControls() {
 async function sendMessage(overridePayload = null) {
   const message = overridePayload ? overridePayload.message : userInput.value.trim();
   if (!message && !overridePayload) return;
+
+  const isQuickAction = Boolean(overridePayload && overridePayload.action_prompt);
 
   appendMessage("user", message, "已送出");
   userInput.value = "";
@@ -231,12 +295,18 @@ async function sendMessage(overridePayload = null) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+    if (!res.ok) {
+      const errorBody = await res.json().catch(() => ({}));
+      throw new Error(errorBody.detail ? JSON.stringify(errorBody.detail) : `HTTP ${res.status}`);
+    }
     const data = await res.json();
 
-    appendMessage("ai", data.reply, data.model_name || data.provider);
+    appendMessage("ai", data.reply, data.model_name || data.provider, data.avatar);
     setState(data);
+    if (isQuickAction) appendSystemChip("✅ 已送出");
   } catch (err) {
     appendMessage("ai", "連線失敗了，稍後再試一次好嗎？", "error");
+    if (isQuickAction) appendSystemChip("⚠️ 動作失敗，請確認後端服務後重試");
   } finally {
     hideTypingIndicator();
     sendBtn.disabled = false;
@@ -286,7 +356,7 @@ function sendQuickAction(btn, action, text) {
   });
 }
 
-document.querySelectorAll(".quick-actions button").forEach((btn) => {
+document.querySelectorAll(".line-quick-actions button").forEach((btn) => {
   btn.addEventListener("click", () => {
     sendQuickAction(btn, btn.dataset.action, btn.textContent);
   });
@@ -295,7 +365,8 @@ document.querySelectorAll(".quick-actions button").forEach((btn) => {
 function openPersonaDrawer() {
   personaDrawer?.classList.add("open");
   personaDrawer?.setAttribute("aria-hidden", "false");
-  loadPersona();
+  loadSoulsList();
+  loadActivePersonaIntoForm();
 }
 
 function closePersonaPanel() {
@@ -303,34 +374,254 @@ function closePersonaPanel() {
   personaDrawer?.setAttribute("aria-hidden", "true");
 }
 
-async function loadPersona() {
+function fillPersonaForm({ name = "", birthday = "", soul = "", avatar = "" } = {}) {
+  personaNameInput.value = name;
+  personaBirthdayInput.value = birthday;
+  personaAvatarInput.value = avatar;
+  personaSoulInput.value = soul;
+}
+
+// Loads whatever persona is currently active for chat (the saved /persona
+// override, falling back to the default soul) so re-opening the drawer
+// shows the character you're actually talking to, not a blank form.
+async function loadActivePersonaIntoForm() {
+  try {
+    const res = await fetch(`${API_BASE}/persona`);
+    const data = await res.json();
+    const persona = data.persona || {};
+    if (persona.name) {
+      fillPersonaForm({
+        name: persona.name,
+        birthday: persona.birthday || "",
+        avatar: persona.avatar || "",
+        soul: persona.soul_md || persona.personality || ""
+      });
+      currentPersonaProfile = persona;
+      updateAvatarDisplay(persona.avatar);
+      return;
+    }
+  } catch (err) {
+    // fall through to defaults below
+  }
+  fillPersonaForm({ name: "Nova", birthday: "2003-09-14", avatar: "👑", soul: "" });
+  updateAvatarDisplay("👑");
+}
+
+async function loadSoulsList() {
   try {
     const res = await fetch(`${API_BASE}/souls`);
+    if (!res.ok) throw new Error("souls list failed");
     const data = await res.json();
-    const firstSoul = data.souls[0] || {};
-    currentPersonaProfile = {
-      name: document.getElementById("personaName").value || firstSoul.name || "Rosé",
-      birthday: document.getElementById("personaBirthday").value || firstSoul.birthday || "1997-02-11 水瓶座",
-      personality: document.getElementById("personaSoul").value || firstSoul.personality || "精緻高雅、冷艷金髮女神"
-    };
+    souls = data.souls || [];
+    renderSoulList();
   } catch (err) {
-    currentPersonaProfile = {
-      name: "Rosé", birthday: "1997-02-11 水瓶座", personality: "精緻高雅、冷艷金髮女神"
-    };
+    if (soulListEl) soulListEl.innerHTML = `<div class="model-error">無法讀取角色清單，請確認後端服務。</div>`;
   }
 }
 
-function savePersona() {
-  loadPersona(); // grabs from fields
-  fetch(`${API_BASE}/persona`, { method: "POST" }).catch(() => {}); // Optional sync with backend if needed
-  closePersonaPanel();
-  appendSystemChip(`已載入靈魂：${currentPersonaProfile.name}`);
+function renderSoulList() {
+  if (!soulListEl) return;
+  soulListEl.innerHTML = "";
+  souls.forEach((soul) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = `soul-chip ${soul.id === currentSoulId ? "active" : ""}`;
+    chip.textContent = soul.name || soul.id;
+    chip.addEventListener("click", () => selectSoul(soul.id));
+    soulListEl.appendChild(chip);
+  });
+}
+
+async function selectSoul(soulId) {
+  try {
+    const res = await fetch(`${API_BASE}/souls/${encodeURIComponent(soulId)}`);
+    if (!res.ok) throw new Error("soul not found");
+    const soul = await res.json();
+    currentSoulId = soulId;
+    fillPersonaForm({
+      name: soul.name,
+      birthday: soul.birthday || "",
+      avatar: soul.avatar || "👑",
+      soul: soul.system_prompt_base || ""
+    });
+    // 立即更新頭貼預覽與 header
+    if (soul.avatar) personaAvatarInput.value = soul.avatar;
+    updateAvatarDisplay(soul.avatar || "👑");
+    renderSoulList();
+  } catch (err) {
+    appendSystemChip("⚠️ 載入角色失敗，請稍後再試");
+  }
+}
+
+function startNewSoul() {
+  currentSoulId = null;
+  fillPersonaForm({ name: "", birthday: "", avatar: "👑", soul: "" });
+  renderSoulList();
+}
+
+async function savePersona() {
+  const name = personaNameInput.value.trim();
+  const birthday = personaBirthdayInput.value.trim();
+  const avatar = personaAvatarInput.value.trim();
+  const soulText = personaSoulInput.value.trim();
+
+  if (!name) {
+    appendSystemChip("⚠️ 請先輸入角色名稱再儲存");
+    return;
+  }
+
+  savePersonaBtn.disabled = true;
+  try {
+    // Persist as a reusable soul in the harem library.
+    const soulRes = await fetch(`${API_BASE}/souls`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: currentSoulId || undefined,
+        name,
+        birthday,
+        personality: soulText,
+        system_prompt_base: soulText,
+        avatar: avatar || "👑"
+      })
+    });
+    if (!soulRes.ok) throw new Error("souls save failed");
+    const soulData = await soulRes.json();
+    currentSoulId = soulData.soul.id;
+
+    // Persist as the active override used by every /webhook/chat call.
+    const personaRes = await fetch(`${API_BASE}/persona`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, birthday, avatar: avatar || "👑", personality: soulText, soul_md: soulText })
+    });
+    if (!personaRes.ok) throw new Error("persona save failed");
+    const personaData = await personaRes.json();
+    currentPersonaProfile = personaData.persona;
+    updateAvatarDisplay(currentPersonaProfile.avatar);
+
+    await loadSoulsList();
+    appendSystemChip(`💗 已儲存靈魂：${name}`);
+    closePersonaPanel();
+  } catch (err) {
+    appendSystemChip("⚠️ 儲存靈魂失敗，請確認後端服務後重試");
+  } finally {
+    savePersonaBtn.disabled = false;
+  }
+}
+
+function exportSoul() {
+  const name = personaNameInput.value.trim() || "未命名角色";
+  const birthday = personaBirthdayInput.value.trim();
+  const soulText = personaSoulInput.value.trim();
+
+  const markdown = `---\nname: "${name}"\nbirthday: "${birthday}"\nzodiac: ""\npersonality: ""\n---\n${soulText}\n`;
+  const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${currentSoulId || "soul"}.md`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function importSoulFromFile(file) {
+  const text = await file.text();
+  const idGuess = file.name.replace(/\.md$/i, "") || `imported-${Date.now()}`;
+  try {
+    const res = await fetch(`${API_BASE}/souls/import`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: idGuess, markdown: text })
+    });
+    if (!res.ok) throw new Error("import failed");
+    const data = await res.json();
+    currentSoulId = data.soul.id;
+    await loadSoulsList();
+    await selectSoul(currentSoulId);
+    appendSystemChip(`📥 已匯入靈魂：${data.soul.name}`);
+  } catch (err) {
+    appendSystemChip("⚠️ 匯入 Soul.md 失敗，請確認檔案格式");
+  }
 }
 
 openPersonaDrawerBtn.addEventListener("click", openPersonaDrawer);
 closePersonaDrawerBtn.addEventListener("click", closePersonaPanel);
 personaDrawerBackdrop.addEventListener("click", closePersonaPanel);
 savePersonaBtn.addEventListener("click", savePersona);
+newSoulBtn?.addEventListener("click", startNewSoul);
+exportSoulBtn?.addEventListener("click", exportSoul);
+importSoulBtn?.addEventListener("click", () => importSoulFile?.click());
+importSoulFile?.addEventListener("change", (e) => {
+  const file = e.target.files?.[0];
+  if (file) importSoulFromFile(file);
+  e.target.value = "";
+});
+
+// --- Avatar upload wiring (was completely missing) ---
+const uploadAvatarBtn = document.getElementById("uploadAvatarBtn");
+const avatarUploadFile = document.getElementById("avatarUploadFile");
+const avatarPreview = document.getElementById("avatarPreview");
+
+uploadAvatarBtn?.addEventListener("click", () => avatarUploadFile?.click());
+avatarUploadFile?.addEventListener("change", (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = reader.result;
+    personaAvatarInput.value = dataUrl;
+    if (avatarPreview) {
+      if (typeof dataUrl === "string" && dataUrl.startsWith("data:image")) {
+        avatarPreview.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />`;
+      } else {
+        avatarPreview.textContent = "👑";
+      }
+    }
+    updateAvatarDisplay(dataUrl);
+    appendSystemChip("📷 頭貼已上傳（儲存靈魂後生效）");
+  };
+  reader.readAsDataURL(file);
+  e.target.value = "";
+});
+
+const avatarAiPromptBtn = document.getElementById("avatarAiPromptBtn");
+avatarAiPromptBtn?.addEventListener("click", () => {
+  closePersonaPanel();
+  sendQuickAction(avatarAiPromptBtn, avatarAiPromptBtn.dataset.action, avatarAiPromptBtn.textContent);
+});
 
 loadModels();
 loadState();
+
+// 初始化時預載角色頭貼（從 /persona 或預設 soul）
+(async function preloadAvatar() {
+  try {
+    const personaRes = await fetch(`${API_BASE}/persona`);
+    const personaData = await personaRes.json();
+    const persona = personaData.persona || {};
+    if (persona.avatar) {
+      updateAvatarDisplay(persona.avatar);
+      personaAvatarInput.value = persona.avatar;
+      return;
+    }
+  } catch (_) {}
+  // fallback: 從第一個 soul 載入頭貼
+  try {
+    const soulsRes = await fetch(`${API_BASE}/souls`);
+    const soulsData = await soulsRes.json();
+    const souls = soulsData.souls || [];
+    if (souls[0]) {
+      updateAvatarDisplay(souls[0].avatar || "👑");
+    }
+  } catch (_) {}
+})();
+
+// 測試板：點鑽石餘額可手動設定數量。
+if (diamondsBalance?.parentElement) {
+  diamondsBalance.parentElement.addEventListener("click", promptSetDiamonds);
+  diamondsBalance.parentElement.style.cursor = "pointer";
+  diamondsBalance.parentElement.title = "點我設定鑽石（測試板）";
+}

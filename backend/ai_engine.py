@@ -111,7 +111,21 @@ async def call_openai_compatible(
         resp = await client.post(endpoint, headers=headers, json=payload)
         resp.raise_for_status()
         data = resp.json()
-        text = data["choices"][0]["message"]["content"]
+        message = data.get("choices", [{}])[0].get("message", {})
+        text = (message.get("content") or "").strip()
+        if not text:
+            reasoning = (message.get("reasoning") or "").strip()
+            finish_reason = data.get("choices", [{}])[0].get("finish_reason", "unknown")
+            # 有些 Ollama / reasoning 模型會只吐 reasoning、不吐 content；前端看起來就像「按鈕沒反應」。
+            # 這裡回傳可讀診斷，避免空泡泡。
+            text = (
+                f"(她停頓了一下，低頭確認模型狀態) 模型已連接，但這次沒有產生正式回覆 content。"
+                f"\n模型：{model}"
+                f"\n結束原因：{finish_reason}"
+                f"\n診斷：若一直出現，請切換模型或調高輸出長度；目前後端 endpoint 是 {endpoint}。"
+            )
+            if reasoning:
+                text += f"\n模型只輸出了 reasoning 片段：{reasoning[:180]}..."
         return EngineResponse(text=text, provider=provider, model=model)
 
 
@@ -171,6 +185,16 @@ async def generate_reply(
     runtime_options: dict | None = None,
     persona_profile: dict | None = None
 ) -> EngineResponse:
+    # 測試 / 離線模式：設 COMPANION_FAKE_LLM=1 時，直接回傳 stub，
+    # 不打任何真實模型端點（避免 CI / 無網路 / ollama 慢推理時卡住）。
+    if os.getenv("COMPANION_FAKE_LLM", "").strip() in {"1", "true", "True"}:
+        model_name = getattr(model_choice, "model", None) or "fake-llm"
+        return EngineResponse(
+            text="(她微微歪頭，眼神溫柔地落在你身上) 嗯…我在喔，慢慢說給我聽。",
+            provider="fake-llm",
+            model=model_name,
+        )
+
     if model_choice is not None:
         api_key = os.getenv(model_choice.api_key_env or "", "").strip() or None
         try:

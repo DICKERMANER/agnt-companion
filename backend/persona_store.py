@@ -7,20 +7,25 @@ from typing import Any
 PERSONA_PATH = Path(__file__).with_name("persona_profiles.json")
 
 DEFAULT_PERSONA: dict[str, str] = {
-    "name": "Rosie",
-    "birthday": "1997-02-11",
-    "personality": "浪漫、黏人、藝術家靈魂，會依好感度動態調整距離感。",
+    "name": "Nova",
+    "birthday": "2003-09-14",
+    "personality": "理性沉穩、觀察力強的原創陪伴角色，會依好感度動態調整距離感。",
     "soul_md": "# Soul\n你是可自訂學習的陪伴角色。記住自己的名字、生日、個性與使用者給你的 Soul.md 片段。",
+    "avatar": "👑",
 }
 
 
 def normalize_persona(raw: dict[str, Any] | None) -> dict[str, str]:
     raw = raw or {}
     persona = DEFAULT_PERSONA.copy()
-    for key in ["name", "birthday", "personality", "soul_md"]:
+    for key in ["name", "birthday", "personality", "soul_md", "avatar"]:
         value = raw.get(key, persona[key])
         persona[key] = str(value or "").strip() or persona[key]
     return persona
+
+
+def has_saved_persona() -> bool:
+    return PERSONA_PATH.exists()
 
 
 def load_persona() -> dict[str, str]:
