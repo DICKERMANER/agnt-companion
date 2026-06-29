@@ -8,15 +8,19 @@ const API_BASE = _isLocal
 
 const USER_ID = "demo_user";
 
-// GitHub Pages 無後端時顯示醒目提示
-if (!_isLocal && !API_BASE) {
-  document.addEventListener("DOMContentLoaded", () => {
-    const banner = document.createElement("div");
-    banner.style.cssText = "background:#ff9800;color:#000;padding:10px 16px;text-align:center;font-size:14px;font-weight:600";
-    banner.textContent = "⚠️ 未設定後端 API。請啟動本地伺服器並改用 http://127.0.0.1:5500 測試，或設定 CYBER_COMPANION_BACKEND 指向公開後端。";
+// GitHub Pages 無後端時顯示醒目提示（立即執行，不等 DOMContentLoaded）
+(function showBackendWarning() {
+  if (_isLocal || API_BASE) return;
+  const banner = document.createElement("div");
+  banner.id = "backend-warning";
+  banner.style.cssText = "background:#ff9800;color:#000;padding:10px 16px;text-align:center;font-size:14px;font-weight:600;position:sticky;top:0;z-index:9999";
+  banner.textContent = "⚠️ 未設定後端 API。請啟動本地伺服器並改用 http://127.0.0.1:5500 測試，或設定 CYBER_COMPANION_BACKEND 指向公開後端。";
+  if (document.body) {
     document.body.prepend(banner);
-  });
-}
+  } else {
+    document.addEventListener("DOMContentLoaded", () => document.body.prepend(banner), { once: true });
+  }
+})();
 
 const chatWindow = document.getElementById("chatWindow");
 const userInput = document.getElementById("userInput");
