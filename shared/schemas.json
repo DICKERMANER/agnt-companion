@@ -1,0 +1,23 @@
+{
+  "chat_request": {
+    "type": "object",
+    "required": ["user_id", "message"],
+    "properties": {
+      "user_id": { "type": "string" },
+      "message": { "type": "string" },
+      "provider": { "type": "string", "enum": ["local", "cloud"] },
+      "action_prompt": { "type": ["string", "null"] }
+    }
+  },
+  "chat_response": {
+    "type": "object",
+    "required": ["reply", "provider", "diamonds_balance", "favorability_score", "relationship_stage"],
+    "properties": {
+      "reply": { "type": "string" },
+      "provider": { "type": "string" },
+      "diamonds_balance": { "type": "integer" },
+      "favorability_score": { "type": "integer" },
+      "relationship_stage": { "type": "string" }
+    }
+  }
+}

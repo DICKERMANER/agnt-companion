@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="CyberCompanion" />
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>Cyber Companion LINE Mode</title>
+  </head>
+  <body>
+    <div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
+    <div id="stageTransition" class="stage-transition" aria-live="polite">
+      <div class="stage-transition-card">
+        <div class="stage-transition-kicker">RELATIONSHIP</div>
+        <div id="stageTransitionText" class="stage-transition-text">新的關係階段已解鎖</div>
+      </div>
+    </div>
+
+    <div id="modelDrawer" class="model-drawer" aria-hidden="true">
+      <div class="model-drawer-backdrop" id="modelDrawerBackdrop"></div>
+      <aside class="model-panel" aria-label="模型切換">
+        <div class="model-panel-header">
+          <div>
+            <div class="model-panel-title">切換模型</div>
+            <div class="model-panel-subtitle">像 Hermes /model 一樣切換 API 或本地模型</div>
+          </div>
+          <div class="model-settings-card">
+            <label class="switch-input">
+              <input type="checkbox" id="thinkingToggle" />
+              <span>Thinking (思考模式)</span>
+            </label>
+            <label class="switch-input">
+              <input type="checkbox" id="fastToggle" />
+              <span>Fast Mode (省 token)</span>
+            </label>
+            <select id="reasoningEffort">
+              <option value="minimal">Minimal</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="max">Max</option>
+            </select>
+          </div>
+          <button id="closeModelDrawer" class="icon-button" type="button">✕</button>
+        </div>
+        <div id="modelList" class="model-list"></div>
+      </aside>
+    </div>
+
+    <div id="personaDrawer" class="model-drawer" aria-hidden="true">
+      <div class="model-drawer-backdrop" id="personaDrawerBackdrop"></div>
+      <aside class="model-panel persona-panel" aria-label="人格自訂">
+        <div class="model-panel-header">
+          <div>
+            <div class="model-panel-title">自訂角色 (Soul)</div>
+            <div class="model-panel-subtitle">建立或修改你的專屬陪伴靈魂</div>
+          </div>
+          <button id="closePersonaDrawer" class="icon-button" type="button">✕</button>
+        </div>
+        <div class="persona-form">
+          <input type="text" id="personaName" placeholder="角色名稱 (e.g. 朴彩英)" />
+          <input type="text" id="personaBirthday" placeholder="生日/星座 (e.g. 1997-02-11 水瓶座)" />
+          <textarea id="personaSoul" rows="5" placeholder="性格核心設定 (e.g. 精緻高雅、冷艷...)"></textarea>
+          <button id="savePersona" type="button" class="primary-btn">儲存人格</button>
+        </div>
+      </aside>
+    </div>
+
+    <div class="line-app-shell">
+      <header class="line-chat-header">
+        <button class="icon-button" type="button" aria-label="返回">‹</button>
+        <div class="avatar">👑</div>
+        <div class="chat-title-block">
+          <div class="chat-title">王室風格陪伴引擎</div>
+          <div class="chat-subtitle">
+            <span id="currentModelLabel">模型載入中...</span>
+            <span class="dot-separator">·</span>
+            <span id="stageBadge" class="stage-badge">cold</span>
+          </div>
+        </div>
+        <button id="modelButton" class="model-button" type="button">/model</button>
+      </header>
+
+      <section class="line-status-strip">
+        <span>💎 <strong id="diamondsBalance">--</strong></span>
+        <span>💗 <strong id="favorText">0 / 100</strong></span>
+        <progress id="favorBar" value="0" max="100"></progress>
+      </section>
+
+      <main id="chatWindow" class="line-chat-window">
+        <div class="system-chip">今天</div>
+        <div class="system-chip compact">⚠️ AI 生成內容僅供陪伴互動參考</div>
+        <div id="typingIndicator" class="typing-indicator" hidden>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-label">正在輸入...</span>
+        </div>
+      </main>
+
+      <section class="quick-actions line-quick-actions">
+        <button data-action="換頭像：請切換成新的造型並描述細節。">換頭像</button>
+        <button data-action="拍拍肩：給我溫柔安撫與鼓勵。">拍拍肩</button>
+        <button data-action="換場景：切換到新的沉浸式場景。">換場景</button>
+        <button data-action="給予否定：請表現低落與需要被理解的情緒。">否定</button>
+        <button data-action="給予肯定：請表現開心、依戀與獎勵感。">肯定</button>
+      </section>
+
+      <footer class="line-composer">
+        <button id="openPersonaDrawer" class="plus-button" type="button">＋</button>
+        <input id="userInput" type="text" placeholder="Aa" autocomplete="off" />
+        <button id="sendBtn" class="send-button" type="button">➤</button>
+      </footer>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
