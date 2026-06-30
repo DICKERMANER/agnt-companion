@@ -28,6 +28,82 @@ const USER_ID = "demo_user";
   }
 })();
 
+// === 軟鍵盤無縫適配 ===
+(function initSoftKeyboardHandler() {
+  const composer = document.querySelector(".line-composer");
+  const inputField = document.getElementById("userInput");
+  
+  if (!inputField || !composer) return;
+  
+  // 監聽輸入框焦點，自動滾動到視圖內
+  inputField.addEventListener("focus", () => {
+    setTimeout(() => {
+      // 讓輸入框及其容器完全可見
+      inputField.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      composer.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 100);
+  });
+  
+  // iOS/Android 軟鍵盤行為差異補償
+  if (/iPhone|iPad|iPod|Android/.test(navigator.userAgent)) {
+    let lastInnerHeight = window.innerHeight;
+    
+    window.addEventListener("resize", () => {
+      const currentHeight = window.innerHeight;
+      if (currentHeight < lastInnerHeight) {
+        // 軟鍵盤彈出，innerHeight 縮小
+        inputField.scrollIntoView({ behavior: "auto", block: "nearest" });
+      }
+      lastInnerHeight = currentHeight;
+    });
+  }
+})();
+
+// === 🆕 Beta 版本信息面板初始化 ===
+(function initBetaPanel() {
+  if (!window.DEBUG_MODE) return;
+  
+  const betaPanel = document.getElementById("betaInfoPanel");
+  if (!betaPanel) return;
+  
+  betaPanel.hidden = false;
+  
+  // 更新後端狀態
+  const backendStatus = document.getElementById("backendStatus");
+  if (API_BASE) {
+    backendStatus.textContent = `✅ ${API_BASE.split("://")[0].toUpperCase()}`;
+    backendStatus.style.color = "#90ee90";
+  } else {
+    backendStatus.textContent = "❌ 未設定";
+    backendStatus.style.color = "#ff6b6b";
+  }
+  
+  // 顯示調試模式標籤
+  const debugModeLabel = document.getElementById("debugModeLabel");
+  if (debugModeLabel) {
+    debugModeLabel.textContent = "🧪 DEBUG ON";
+    debugModeLabel.style.color = "#ffd700";
+  }
+  
+  // 定期檢查後端連接狀態
+  setInterval(async () => {
+    try {
+      const res = await fetch(`${API_BASE}/health`, { method: "GET" });
+      if (res.ok) {
+        if (backendStatus) {
+          backendStatus.textContent = `✅ 連接中`;
+          backendStatus.style.color = "#90ee90";
+        }
+      }
+    } catch (err) {
+      if (backendStatus) {
+        backendStatus.textContent = "⚠️ 連接失敗";
+        backendStatus.style.color = "#ffaa44";
+      }
+    }
+  }, 10000); // 每 10 秒檢查一次
+})();
+
 const chatWindow = document.getElementById("chatWindow");
 const userInput = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
@@ -77,6 +153,7 @@ let previousStage = null;
 let stageTransitionTimer = null;
 let selectedModelId = null;
 let models = [];
+let isSending = false; // 防止重複發送
 
 const STAGE_LABELS = {
   cold: "冷淡觀察期",
@@ -118,16 +195,24 @@ function appendMessage(role, text, meta = "", avatarValue = null) {
   bubble.textContent = text;
   bubbleWrapper.appendChild(bubble);
 
-  if (meta) {
-    const metaEl = document.createElement("div");
-    metaEl.className = "msg-meta";
-    metaEl.textContent = meta;
-    bubbleWrapper.appendChild(metaEl);
+  // 時間戳
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit", hour12: false });
+
+  const metaEl = document.createElement("div");
+  metaEl.className = "msg-meta";
+  if (role === "user") {
+    metaEl.innerHTML = `<span class="msg-read-status">已送出</span> ${timeStr}`;
+    metaEl.dataset.readStatus = "sent";
+  } else {
+    metaEl.textContent = meta ? `${meta} · ${timeStr}` : timeStr;
   }
+  bubbleWrapper.appendChild(metaEl);
 
   row.appendChild(bubbleWrapper);
   chatWindow.insertBefore(row, typingIndicator || null);
   chatWindow.scrollTop = chatWindow.scrollHeight;
+  return row;
 }
 
 function appendSystemChip(text) {
@@ -265,7 +350,7 @@ async function loadState() {
 // 測試板：點擊鑽石餘額可手動輸入要設定的數量。
 async function promptSetDiamonds() {
   const current = (diamondsBalance.textContent || "").trim();
-  const input = window.prompt("測試板：請輸入鑽石餘額 (0~999999)", current === "--" ? "100" : current);
+  const input = window.prompt("🧪 測試板：請輸入鑽石餘額 (0~999999)", current === "--" ? "100" : current);
   if (input === null) return;
   const value = parseInt(input.trim(), 10);
   if (Number.isNaN(value) || value < 0 || value > 999999) {
@@ -287,6 +372,31 @@ async function promptSetDiamonds() {
   }
 }
 
+// 🆕 測試板：點擊好感度可手動調整（Beta 版測試用）
+async function promptSetFavorability() {
+  const current = (favorText.textContent || "").split(" / ")[0] || "0";
+  const input = window.prompt("🧪 測試板：請輸入好感度 (0~100)", current);
+  if (input === null) return;
+  const value = parseInt(input.trim(), 10);
+  if (Number.isNaN(value) || value < 0 || value > 100) {
+    appendSystemChip("⚠️ 好感度需為 0~100 的整數");
+    return;
+  }
+  try {
+    const res = await fetch(`${API_BASE}/state/${USER_ID}/favorability`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ favorability_score: value })
+    });
+    if (!res.ok) throw new Error("set favorability failed");
+    const data = await res.json();
+    setState(data);
+    appendSystemChip(`💗 已設定好感度：${data.favorability_score} / 100`);
+  } catch (err) {
+    appendSystemChip("⚠️ 設定好感度失敗，請確認後端服務");
+  }
+}
+
 function syncModelRuntimeControls() {
   modelRuntimeOptions = {
     thinking_enabled: document.getElementById("thinkingToggle")?.checked || false,
@@ -296,6 +406,12 @@ function syncModelRuntimeControls() {
 }
 
 async function sendMessage(overridePayload = null) {
+  // 防止重複發送
+  if (isSending) {
+    appendSystemChip("⏳ 消息發送中，請稍候...");
+    return;
+  }
+  
   const message = overridePayload ? overridePayload.message : userInput.value.trim();
   if (!message && !overridePayload) return;
 
@@ -304,7 +420,12 @@ async function sendMessage(overridePayload = null) {
   appendMessage("user", message, "已送出");
   userInput.value = "";
   sendBtn.disabled = true;
+  isSending = true; // 標記發送中
   showTypingIndicator();
+
+  // 抓最後一條 user 的 meta 元素，AI 回覆時更新為已讀
+  const allUserMeta = chatWindow.querySelectorAll(".msg-row.user .msg-meta[data-read-status]");
+  const lastUserMeta = allUserMeta[allUserMeta.length - 1];
 
   syncModelRuntimeControls();
 
@@ -321,7 +442,7 @@ async function sendMessage(overridePayload = null) {
   pendingActionPrompt = "";
 
   try {
-    // 設定 120s timeout（本地模型推理 + tunnel 延遲）
+    // 設定 120s timeout（本地模型推理 / 雲端 Render 冷啟動可能較慢）
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 120000);
     
@@ -340,6 +461,12 @@ async function sendMessage(overridePayload = null) {
     const data = await res.json();
 
     appendMessage("ai", data.reply, data.model_name || data.provider, data.avatar);
+    // 更新最後 user 訊息為「已讀 1」
+    if (lastUserMeta) {
+      const timeStr = lastUserMeta.textContent.trim().replace("已送出 ", "").replace(/^已讀 1 /, "");
+      lastUserMeta.innerHTML = `<span class="msg-read-status read">已讀 1</span> ${timeStr}`;
+      lastUserMeta.dataset.readStatus = "read";
+    }
     setState(data);
     if (isQuickAction) appendSystemChip("✅ 已送出");
   } catch (err) {
@@ -349,6 +476,7 @@ async function sendMessage(overridePayload = null) {
   } finally {
     hideTypingIndicator();
     sendBtn.disabled = false;
+    isSending = false; // 重設發送狀態
     userInput.focus();
   }
 }
@@ -673,7 +801,19 @@ loadState();
 if (diamondsBalance?.parentElement) {
   diamondsBalance.parentElement.addEventListener("click", promptSetDiamonds);
   diamondsBalance.parentElement.style.cursor = "pointer";
-  diamondsBalance.parentElement.title = "點我設定鑽石（測試板）";
+  diamondsBalance.parentElement.title = window.DEBUG_MODE ? "🧪 點我設定鑽石（測試板）" : "💎 鑽石餘額";
+}
+
+// 🆕 好感度也可點擊調整（Beta 測試用）
+if (favorText) {
+  // 只在 DEBUG_MODE 下才顯示可點擊的提示
+  if (window.DEBUG_MODE) {
+    favorText.addEventListener("click", promptSetFavorability);
+    favorText.style.cursor = "pointer";
+    favorText.title = "🧪 點我設定好感度（測試板）";
+  } else {
+    favorText.style.cursor = "default";
+  }
 }
 
 // ============================================================
@@ -764,7 +904,19 @@ function appendImageBubble(role, src, filename) {
   wrapper.className = "msg-bubble-wrapper";
   const bubble = document.createElement("div");
   bubble.className = `msg ${role} msg-image`;
-  bubble.innerHTML = `<img src="${src}" alt="${filename}" style="max-width:200px;max-height:200px;border-radius:12px;display:block;cursor:pointer;" onclick="this.requestFullscreen?.()"/>`;
+  
+  // 安全地創建圖片元素，避免屬性注入
+  const img = document.createElement("img");
+  img.src = src;
+  img.alt = filename; // setAttribute 會自動轉義，textContent 也安全
+  img.style.cssText = "max-width:200px;max-height:200px;border-radius:12px;display:block;cursor:pointer;";
+  img.addEventListener("click", () => {
+    if (img.requestFullscreen) {
+      img.requestFullscreen().catch(() => {});
+    }
+  });
+  
+  bubble.appendChild(img);
   wrapper.appendChild(bubble);
   const meta = document.createElement("div");
   meta.className = "msg-meta";
@@ -782,7 +934,24 @@ function appendDocBubble(role, filename, size) {
   wrapper.className = "msg-bubble-wrapper";
   const bubble = document.createElement("div");
   bubble.className = `msg ${role} msg-doc`;
-  bubble.innerHTML = `<span class="doc-icon">📄</span><span class="doc-name">${filename}</span><span class="doc-size">${(size/1024).toFixed(1)} KB</span>`;
+  
+  // 安全地組合文件氣泡，避免 XSS
+  const icon = document.createElement("span");
+  icon.className = "doc-icon";
+  icon.textContent = "📄";
+  
+  const nameSpan = document.createElement("span");
+  nameSpan.className = "doc-name";
+  nameSpan.textContent = filename; // 用 textContent 避免 HTML 注入
+  
+  const sizeSpan = document.createElement("span");
+  sizeSpan.className = "doc-size";
+  sizeSpan.textContent = `${(size/1024).toFixed(1)} KB`;
+  
+  bubble.appendChild(icon);
+  bubble.appendChild(nameSpan);
+  bubble.appendChild(sizeSpan);
+  
   wrapper.appendChild(bubble);
   const meta = document.createElement("div");
   meta.className = "msg-meta";

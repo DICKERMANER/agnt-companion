@@ -864,3 +864,138 @@ progress {
 .line-app-shell {
   position: relative;
 }
+
+/* === 移動端優化 & 觸控反饋 === */
+button {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: all 0.15s ease;
+}
+
+button:active {
+  transform: scale(0.95);
+  opacity: 0.85;
+}
+
+/* 確保所有按鈕達到 48×48px 最小觸控區域 */
+.icon-button {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.icon-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.send-button, .plus-button, .sticker-button, .voice-button {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.line-quick-actions button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 20px;
+}
+
+.ghost-btn, .primary-btn {
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 12px;
+}
+
+/* 輸入框軟鍵盤優化 */
+input[type="text"], textarea {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 8px;
+}
+
+#userInput {
+  font-size: 16px; /* 防止 iOS 軟鍵盤時自動縮放 */
+  padding: 10px 12px;
+}
+
+/* 移動端字體優化（14px 最小） */
+@media (max-width: 600px) {
+  body { font-size: 14px; line-height: 1.5; }
+  input, textarea { font-size: 16px; } /* 防止 iOS 自動縮放 */
+  button { font-size: 16px; }
+  
+  .line-chat-header .chat-title {
+    font-size: 16px;
+  }
+  
+  .line-chat-header .chat-subtitle {
+    font-size: 13px;
+  }
+  
+  .msg { font-size: 14px; word-break: break-word; }
+  
+  /* 媒體菜單觸控友好 */
+  .media-menu-item {
+    padding: 16px 8px;
+    min-height: 56px;
+  }
+}
+
+/* 超長單詞/URL 換行 */
+.msg {
+  word-break: break-word;
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+/* 軟鍵盤推起時輸入框滾入視圖 */
+.line-composer {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+}
+
+/* === Beta 版本信息面板（DEBUG_MODE 專用）=== */
+.beta-info-panel {
+  background: linear-gradient(135deg, rgba(100, 200, 255, 0.15), rgba(150, 100, 255, 0.15));
+  border: 1px solid rgba(100, 200, 255, 0.3);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 8px 0;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.beta-badge {
+  display: inline-block;
+  background: linear-gradient(90deg, #4dd0e1, #b39ddb);
+  color: #000;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+.beta-info > div {
+  padding: 4px 0;
+  line-height: 1.4;
+}
+
+.beta-info strong {
+  color: var(--text);
+  display: inline-block;
+  min-width: 60px;
+}

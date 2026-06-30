@@ -2,13 +2,18 @@
 <html lang="zh-Hant">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0, user-scalable=yes" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: http: https:; media-src 'self' data:; connect-src 'self' http://127.0.0.1:* http://192.168.*:* https://*.onrender.com; frame-ancestors 'none';" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="自定義AGNT虛擬AI伴侶" />
+    <meta name="apple-mobile-web-app-title" content="sexline" />
+    <meta name="description" content="sexline — 超擬真 AI 伴侶，支援本地和雲端模型" />
+    <meta name="theme-color" content="#090b14" />
     <link rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" href="./assets/icons/icon-192.png" />
     <link rel="stylesheet" href="./styles.css" />
-    <title>自定義AGNT虛擬AI伴侶（可以瑟瑟）</title>
+    <title>sexline — 超擬真 AI 伴侶</title>
   </head>
   <body>
     <div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
@@ -92,7 +97,7 @@
         <button class="icon-button" type="button" aria-label="返回">‹</button>
         <div class="avatar" id="headerAvatar">👑</div>
         <div class="chat-title-block">
-          <div class="chat-title">自定義AGNT虛擬AI伴侶（可以瑟瑟）</div>
+          <div class="chat-title">sexline — 超擬真 AI 伴侶</div>
           <div class="chat-subtitle">
             <span id="currentModelLabel">模型載入中...</span>
             <span class="dot-separator">·</span>
@@ -128,6 +133,21 @@
         <button data-action="給予否定：請表現低落與需要被理解的情緒。">否定</button>
         <button data-action="給予肯定：請表現開心、依戀與獎勵感。">肯定</button>
       </section>
+
+      <!-- 🧪 Beta 版本信息面板（DEBUG_MODE 專用）-->
+      <div id="betaInfoPanel" class="beta-info-panel" hidden>
+        <div class="beta-badge">BETA v0.3.0-hotfix</div>
+        <div class="beta-info">
+          <div><strong>版本</strong>：自爽測試版</div>
+          <div><strong>計費</strong>：免費（所有功能無限制）</div>
+          <div><strong>模式</strong>：<span id="debugModeLabel">DEBUG</span></div>
+          <div><strong>後端</strong>：<span id="backendStatus">偵測中...</span></div>
+          <div style="margin-top: 8px; font-size: 12px; color: #999;">
+            💡 下個版本（v0.4.0）會加入付費系統。<br/>
+            本版本用於內部測試，所有功能完全免費。
+          </div>
+        </div>
+      </div>
 
       <!-- 貼圖面板 -->
       <div id="stickerPanel" class="sticker-panel" hidden>
@@ -168,8 +188,26 @@
       <button id="openPersonaDrawer" hidden></button>
     </div>
 
-    <!-- 🔗 公開後端 tunnel URL — 刪除此行即回退到本地模式 -->
-    <script>window.CYBER_COMPANION_BACKEND = "https://estimates-viewed-desktop-submission.trycloudflare.com";</script>
+    <!-- 🔗 雲端後端 URL（Render）— GitHub Pages 上的前端會呼叫這裡 -->
+    <!-- 部署到 Render 後，把下面網址換成你的實際 Render 服務網址，例如：
+         https://sexline-api.onrender.com
+         ⚠️ 這裡只放「後端網址」，絕不放任何 API Key（Key 全在 Render 環境變數）。
+         刪除此行 → 前端回退到本地模式（127.0.0.1:8002）。 -->
+    <script>window.CYBER_COMPANION_BACKEND = "https://sexline-api.onrender.com";</script>
+    
+    <!-- 🧪 Beta 調試模式開關（v0.3.0-hotfix）
+         設置為 true 顯示測試工具（鑽石、好感度調整）
+         正式版改為 false 隱藏測試功能
+    -->
+    <script>window.DEBUG_MODE = true;</script>
+    
+    <!-- 💰 商業版本標記（預留架構）
+         v0.3.0-hotfix：Beta 自爽版，所有功能免費
+         v0.4.0：付費版，鑽石消耗模式
+         v0.5.0：分級系統，根據內容等級調整鑽石消耗
+    -->
+    <script>window.MONETIZATION_VERSION = "beta";</script>
+    
     <script src="./app.js"></script>
   </body>
 </html>

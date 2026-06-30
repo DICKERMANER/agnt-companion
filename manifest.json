@@ -1,6 +1,6 @@
 {
-  "name": "自定義AGNT虛擬AI伴侶（可以瑟瑟）",
-  "short_name": "AGNT伴侶",
+  "name": "sexline（可以瑟瑟）",
+  "short_name": "sexline",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#090b14",
