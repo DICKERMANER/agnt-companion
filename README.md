@@ -130,11 +130,15 @@ AI 會根據關係階段自動調整語氣和回應深度。
 
 ```
 |sexline/
-├── README.md              ← 你在這裡
-├── CLAUDE_HANDOFF.md      ← 給 AI 開發者的說明
-├── sexline-企劃書.html    ← Beta 企劃書
-├── sexline-architecture.html ← 系統架構圖
-├── backend/
+|├── README.md               ← 專案簡介
+|├── AGENTS.md               ← 🧠 **AI 開發者第一步**（取代 CLAUDE_HANDOFF）
+|├── PROJECT_CONTEXT.md      ← 技術大腦（所有細節）
+|├── CONTRIBUTING.md         ← 貢獻指南
+|├── LICENSE                 ← MIT
+|├── CLAUDE_HANDOFF.md       ← 舊版已轉移到 AGENTS.md
+|├── .github/workflows/
+|│   └── deploy.yml          ← GitHub Actions 自動部署
+|├── backend/
 │   ├── main.py            ← FastAPI 主程式
 │   ├── ai_engine.py       ← AI 模型呼叫層
 │   ├── database.py        ← 資料庫模型
@@ -159,13 +163,9 @@ AI 會根據關係階段自動調整語氣和回應深度。
 
 ---
 
-## 🔧 給其他 AI 開發者
+## 🔧 給 AI 開發者
 
-如果你是被 lil yo 邀請來協助的 AI，請先讀 **`CLAUDE_HANDOFF.md`**，裡面有完整的專案說明、規則和開發指引。
-
-```
-https://github.com/DICKERMANER/agnt-companion/blob/master/CLAUDE_HANDOFF.md
-```
+如果你是被 lil yo 邀請來協助的 AI，請先讀 **`AGENTS.md`**（取代舊版 `CLAUDE_HANDOFF.md`），裡面有完整的專案規範和開發指引。所有技術細節在 **`PROJECT_CONTEXT.md`**。
 
 ---
 
