@@ -16,6 +16,7 @@ from ai_engine import (
 )
 from database import Companion, User, get_db, init_db
 from model_registry import get_model_by_id, get_model_choices
+from ai_router import route_model
 from monetization import INSUFFICIENT_BALANCE_MESSAGE, consume_one_diamond
 import persona_store
 from soul_manager import (
@@ -50,6 +51,7 @@ class ChatRequest(BaseModel):
     reasoning_effort: Literal["minimal", "low", "medium", "high", "max"] = "medium"
     action_prompt: Optional[str] = None
     persona_profile: Optional[dict] = None
+    auto_route: bool = True  # AI Router：自動依訊息內容挑模型（使用者不用選）
 
 
 class ChatResponse(BaseModel):
@@ -64,6 +66,8 @@ class ChatResponse(BaseModel):
     thinking_enabled: bool = False
     fast_mode: bool = False
     avatar: str = "👑"
+    routed_task: str | None = None   # AI Router 判定的任務類型
+    routed_reason: str | None = None  # AI Router 選擇理由
 
 
 class ModelSwitchRequest(BaseModel):
@@ -266,6 +270,22 @@ async def webhook_chat(payload: ChatRequest, db: Session = Depends(get_db)) -> C
     user, companion = get_or_create_user_bundle(db, payload.user_id)
     model_choice = get_current_model_choice()
 
+    # ── AI Router：依訊息內容自動挑最適合的模型（使用者不用自己選）──
+    routed_task = None
+    routed_reason = None
+    if payload.auto_route:
+        try:
+            routed_choice, decision = route_model(
+                payload.message, get_model_choices(), current_choice=model_choice
+            )
+            if routed_choice is not None:
+                model_choice = routed_choice
+            routed_task = decision.task_type
+            routed_reason = decision.reason
+        except Exception:
+            # 路由失敗絕不能擋住聊天 → 沿用當前模型
+            pass
+
     if not consume_one_diamond(db, user):
         return ChatResponse(
             reply=INSUFFICIENT_BALANCE_MESSAGE,
@@ -328,6 +348,8 @@ async def webhook_chat(payload: ChatRequest, db: Session = Depends(get_db)) -> C
         thinking_enabled=payload.thinking_enabled,
         fast_mode=payload.fast_mode,
         avatar=active_soul.avatar,
+        routed_task=routed_task,
+        routed_reason=routed_reason,
     )
 
 
