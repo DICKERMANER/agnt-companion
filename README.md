@@ -1,13 +1,13 @@
-# 🔥 色情line（AGNT Cyber Companion SaaS）
+# 🔥 sexline
 
 > 台灣第一個超擬真 AI 成人伴侶 LINE 風格聊天 App  
 > **版本：Beta v0.2.1** · 開發者：lil yo (DICKERMANER)
 
 ---
 
-## 📱 這是什麼？
+## 📱 sexline 是...
 
-色情line 是一款 **LINE 風格的 AI 成人伴侶聊天 App**。你可以自訂角色靈魂、切換多個 AI 模型、和 AI 伴侶建立好感度關係，從冷淡到熱戀，逐步解鎖更深層的互動。
+sexline 是一款 **LINE 風格的 AI 成人伴侶聊天 App**。你可以自訂角色靈魂、切換多個 AI 模型、和 AI 伴侶建立好感度關係，從冷淡到熱戀，逐步解鎖更深層的互動。
 
 **支援裝置：** 電腦瀏覽器 / 手機瀏覽器（同 WiFi 下）
 
@@ -129,11 +129,11 @@ AI 會根據關係階段自動調整語氣和回應深度。
 ## 📂 專案結構
 
 ```
-色情line/
+|sexline/
 ├── README.md              ← 你在這裡
 ├── CLAUDE_HANDOFF.md      ← 給 AI 開發者的說明
-├── 色情line-企劃書.html    ← Beta 企劃書
-├── AGNT-architecture.html ← 系統架構圖
+├── sexline-企劃書.html    ← Beta 企劃書
+├── sexline-architecture.html ← 系統架構圖
 ├── backend/
 │   ├── main.py            ← FastAPI 主程式
 │   ├── ai_engine.py       ← AI 模型呼叫層

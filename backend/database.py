@@ -7,7 +7,7 @@ from typing import Generator
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, create_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, sessionmaker, Session
 
-DATABASE_URL = "sqlite:///./cyber_companion.db"
+DATABASE_URL = "sqlite:///./sexline.db"
 
 engine = create_engine(
     DATABASE_URL,

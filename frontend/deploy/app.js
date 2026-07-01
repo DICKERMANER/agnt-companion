@@ -47,7 +47,6 @@ const modelList = document.getElementById("modelList");
 const currentModelLabel = document.getElementById("currentModelLabel");
 
 const openPersonaDrawerBtn = document.getElementById("openPersonaDrawer");  // hidden legacy
-const personaHeaderBtn    = document.getElementById("personaHeaderBtn");
 const closePersonaDrawerBtn = document.getElementById("closePersonaDrawer");
 const personaDrawer = document.getElementById("personaDrawer");
 const personaDrawerBackdrop = document.getElementById("personaDrawerBackdrop");
@@ -596,8 +595,7 @@ async function importSoulFromFile(file) {
   }
 }
 
-openPersonaDrawerBtn?.addEventListener("click", openPersonaDrawer);
-personaHeaderBtn?.addEventListener("click", openPersonaDrawer);
+openPersonaDrawerBtn?.addEventListener("click", openPersonaDrawer);`r`nheaderAvatar?.addEventListener("click", openPersonaDrawer);
 closePersonaDrawerBtn.addEventListener("click", closePersonaPanel);
 personaDrawerBackdrop.addEventListener("click", closePersonaPanel);
 savePersonaBtn.addEventListener("click", savePersona);

@@ -1,4 +1,4 @@
-# 色情line (AGNT Cyber Companion SaaS)
+# sexline
 
 台灣第一個超擬真 AI 成人伴侶 LINE 風格聊天 App。
 
@@ -64,7 +64,7 @@ npx http-server frontend -p 5500 -a 127.0.0.1 --cors
 - main.py port 8001→8002 ✅
 
 ### lil yo 的規則
-- 專案名稱：色情line
+- 專案名稱：sexline
 - 提到此專案必須先問「如何讓收益最大化」
 - 風格：直接修，不問許可，顯示進度
 - 語言：繁體中文
