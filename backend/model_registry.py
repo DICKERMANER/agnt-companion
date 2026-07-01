@@ -103,6 +103,7 @@ def _api_models_from_cache(limit_per_provider: int = 8) -> list[ModelChoice]:
         "openai-api": ("OpenAI API", "https://api.openai.com/v1", "OPENAI_API_KEY"),
         "openai-codex": ("OpenAI Codex", "https://api.openai.com/v1", "OPENAI_API_KEY"),
         "gemini": ("Gemini", "https://generativelanguage.googleapis.com/v1beta/openai", "GEMINI_API_KEY"),
+        "deepseek": ("DeepSeek", "https://api.deepseek.com/v1", "DEEPSEEK_API_KEY"),
         "xai-oauth": ("xAI / Grok", "https://api.x.ai/v1", "XAI_API_KEY"),
     }
 
@@ -162,6 +163,24 @@ def get_model_choices() -> list[ModelChoice]:
                 kind="api",
             )
         ]
+
+    # 加入 DeepSeek 備援（provider_models_cache 有的時候會由 _api_models_from_cache 自動加入）
+    api_has_deepseek = any(c.provider == "deepseek" for c in api)
+    if not api_has_deepseek and os.getenv("DEEPSEEK_API_KEY", "").strip():
+        deepseek_models = [
+            ("deepseek-chat", "DeepSeek · deepseek-chat"),
+            ("deepseek-reasoner", "DeepSeek · deepseek-reasoner"),
+        ]
+        for model, label in deepseek_models:
+            api.append(ModelChoice(
+                id=f"deepseek:{_safe_slug(model)}",
+                label=label,
+                provider="deepseek",
+                model=model,
+                base_url="https://api.deepseek.com/v1",
+                api_key_env="DEEPSEEK_API_KEY",
+                kind="api",
+            ))
 
     return [*local, *api]
 
