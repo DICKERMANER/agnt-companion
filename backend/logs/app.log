@@ -1,0 +1,309 @@
+2026-06-30 12:26:11 | INFO    | main | === Cyber Companion 後端啟動 port=8002 ===
+2026-06-30 12:26:11 | INFO    | main | 目前選定模型: local:qwythos-q4
+2026-06-30 12:26:21 | INFO    | main | chat request | user=test_log provider=local model=qwythos-q4:latest fast=True msg=嗨你好
+2026-06-30 12:26:21 | INFO    | ai_engine | generate_reply | provider=local model=qwythos-q4:latest kind=local
+2026-06-30 12:26:21 | INFO    | ai_engine | API 調用 | provider=local model=qwythos-q4:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-06-30 12:26:47 | INFO    | ai_engine | API 成功 | provider=local model=qwythos-q4:latest elapsed=25.05s reasoning_fallback=好的，現在要處理使用者的輸入「嗨你好」，這是一個簡單的問候。首先回顧角色的設定，作為 Nova，我需要在回覆時先用括號描述細微的動作和神情，然後以溫暖真誠的口語回應。
+
+使用者只是剛開始對話，的關係階
+2026-06-30 12:26:47 | INFO    | main | chat reply | provider=local model=qwythos-q4:latest len=425 reply=好的，現在要處理使用者的輸入「嗨你好」，這是一個簡單的問候。首先回顧角色的設定，作為 Nova，我需
+2026-06-30 12:28:52 | INFO    | main | chat request | user=demo_user provider=local model=qwythos-q4:latest fast=False msg=了解吧
+2026-06-30 12:28:53 | INFO    | ai_engine | generate_reply | provider=local model=qwythos-q4:latest kind=local
+2026-06-30 12:28:53 | INFO    | ai_engine | API 調用 | provider=local model=qwythos-q4:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-06-30 12:28:53 | ERROR   | ai_engine | API 錯誤 | provider=local model=qwythos-q4:latest error=Client error '400 Bad Request' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400 trace=s.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '400 Bad Request' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+
+2026-06-30 12:28:53 | WARNING | ai_engine | 本地模型失敗 | 無雲端備援 → 重試一次 | model=qwythos-q4:latest
+2026-06-30 12:28:53 | INFO    | ai_engine | API 調用 | provider=local model=qwythos-q4:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-06-30 12:29:13 | INFO    | main | chat request | user=demo_user provider=local model=qwythos-q4:latest fast=True msg=樂扣
+2026-06-30 12:29:14 | INFO    | ai_engine | generate_reply | provider=local model=qwythos-q4:latest kind=local
+2026-06-30 12:29:14 | INFO    | ai_engine | API 調用 | provider=local model=qwythos-q4:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-06-30 12:29:15 | ERROR   | ai_engine | API 錯誤 | provider=local model=qwythos-q4:latest error=Client error '400 Bad Request' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400 trace=s.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '400 Bad Request' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+
+2026-06-30 12:29:15 | WARNING | ai_engine | 本地模型失敗 | 無雲端備援 → 重試一次 | model=qwythos-q4:latest
+2026-06-30 12:29:15 | INFO    | ai_engine | API 調用 | provider=local model=qwythos-q4:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-06-30 12:29:32 | INFO    | ai_engine | API 成功 | provider=local model=qwythos-q4:latest elapsed=38.30s len=250
+2026-06-30 12:29:32 | INFO    | main | chat reply | provider=local model=qwythos-q4:latest len=250 reply=(你剛才那句，其實我聽見了喔)
+
+Rosé 輕聲接話，肩膀貼近你的手臂，帶著點笑意的眼神溫柔落進你臉
+2026-06-30 12:30:12 | INFO    | ai_engine | API 成功 | provider=local model=qwythos-q4:latest elapsed=57.55s len=39
+2026-06-30 12:30:12 | INFO    | main | chat reply | provider=local model=qwythos-q4:latest len=39 reply=(緊緊抱住你，把臉貼在你的胸口蹭了蹭，聲音變得軟糯帶點委屈) 想什麼壞主意呢？
+2026-06-30 14:28:44 | INFO    | main | chat request | user=demo_user provider=local model=qwen-35b-uncensored:latest fast=False msg=肯定
+2026-06-30 14:28:45 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-06-30 14:28:45 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-06-30 14:30:15 | ERROR   | ai_engine | API 錯誤 | provider=local model=qwen-35b-uncensored:latest error= trace=n\Python311\Lib\contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "C:\Users\User\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\httpx\_transports\default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ReadTimeout
+
+2026-06-30 14:30:15 | WARNING | ai_engine | 本地模型失敗 | 無雲端備援 → 重試一次 | model=qwen-35b-uncensored:latest
+2026-06-30 14:30:15 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-06-30 14:31:46 | INFO    | main | chat reply | provider=local-retry-failed model=qwen-35b-uncensored:latest len=47 reply=(她微微蹙眉，指尖輕敲了兩下) 本地模型暫時無回應…再試一次好嗎？
+(ReadTimeout)
+2026-06-30 16:02:08 | INFO    | main | chat request | user=demo_user provider=local model=anthropic/claude-opus-4.8 fast=False msg=肯定
+2026-06-30 16:02:09 | INFO    | ai_engine | generate_reply | provider=openrouter model=anthropic/claude-opus-4.8 kind=api
+2026-06-30 16:02:09 | INFO    | ai_engine | API 調用 | provider=openrouter model=anthropic/claude-opus-4.8 endpoint=https://openrouter.ai/api/v1/chat/completions
+2026-06-30 16:02:09 | ERROR   | ai_engine | API 錯誤 | provider=openrouter model=anthropic/claude-opus-4.8 error=Client error '402 Payment Required' for url 'https://openrouter.ai/api/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402 trace=ine 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '402 Payment Required' for url 'https://openrouter.ai/api/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402
+
+2026-06-30 16:02:09 | INFO    | main | chat reply | provider=openrouter-error model=anthropic/claude-opus-4.8 len=42 reply=(她微微蹙眉，指尖輕敲了兩下) API 模型呼叫失敗：HTTPStatusError
+2026-06-30 16:42:38 | INFO    | main | chat request | user=demo_user provider=local model=anthropic/claude-opus-4.8 fast=False msg=肯定
+2026-06-30 16:42:39 | INFO    | ai_engine | generate_reply | provider=openrouter model=anthropic/claude-opus-4.8 kind=api
+2026-06-30 16:42:39 | INFO    | ai_engine | API 調用 | provider=openrouter model=anthropic/claude-opus-4.8 endpoint=https://openrouter.ai/api/v1/chat/completions
+2026-06-30 16:42:40 | ERROR   | ai_engine | API 錯誤 | provider=openrouter model=anthropic/claude-opus-4.8 error=Client error '402 Payment Required' for url 'https://openrouter.ai/api/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402 trace=ine 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '402 Payment Required' for url 'https://openrouter.ai/api/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/402
+
+2026-06-30 16:42:40 | INFO    | main | chat reply | provider=openrouter-error model=anthropic/claude-opus-4.8 len=42 reply=(她微微蹙眉，指尖輕敲了兩下) API 模型呼叫失敗：HTTPStatusError
+2026-06-30 16:42:43 | INFO    | main | chat request | user=demo_user provider=local model=qwen-35b-uncensored:latest fast=False msg=肯定
+2026-06-30 16:42:44 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-06-30 16:42:44 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-06-30 16:42:44 | ERROR   | ai_engine | API 錯誤 | provider=local model=qwen-35b-uncensored:latest error=Client error '400 Bad Request' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400 trace=s.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '400 Bad Request' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+
+2026-06-30 16:42:44 | WARNING | ai_engine | 本地模型失敗 | 無雲端備援 → 重試一次 | model=qwen-35b-uncensored:latest
+2026-06-30 16:42:44 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-06-30 16:44:15 | INFO    | main | chat reply | provider=local-retry-failed model=qwen-35b-uncensored:latest len=51 reply=(她微微蹙眉，指尖輕敲了兩下) 本地模型暫時無回應…再試一次好嗎？
+(HTTPStatusError
+2026-06-30 16:46:48 | INFO    | main | chat request | user=demo_user provider=local model=qwythos-q5:latest fast=False msg=肯定
+2026-06-30 16:46:50 | INFO    | ai_engine | generate_reply | provider=local model=qwythos-q5:latest kind=local
+2026-06-30 16:46:50 | INFO    | ai_engine | API 調用 | provider=local model=qwythos-q5:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-06-30 16:48:21 | ERROR   | ai_engine | API 錯誤 | provider=local model=qwythos-q5:latest error= trace=n\Python311\Lib\contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "C:\Users\User\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\httpx\_transports\default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ReadTimeout
+
+2026-06-30 16:48:21 | WARNING | ai_engine | 本地模型失敗 | 無雲端備援 → 重試一次 | model=qwythos-q5:latest
+2026-06-30 16:48:21 | INFO    | ai_engine | API 調用 | provider=local model=qwythos-q5:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-06-30 16:49:39 | INFO    | ai_engine | API 成功 | provider=local model=qwythos-q5:latest elapsed=77.42s len=920
+2026-06-30 16:49:39 | INFO    | main | chat reply | provider=local model=qwythos-q5:latest len=920 reply=**Rosé:** (eyes lighting up like she just got back
+2026-06-30 18:45:03 | INFO    | main | chat request | user=demo_user provider=local model=qwen-35b-uncensored:latest fast=False msg=肯定
+2026-06-30 18:45:04 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-06-30 18:45:04 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-06-30 18:46:45 | ERROR   | ai_engine | API 錯誤 | provider=local model=qwen-35b-uncensored:latest error= trace=n\Python311\Lib\contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "C:\Users\User\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\httpx\_transports\default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ReadTimeout
+
+2026-06-30 18:46:46 | WARNING | ai_engine | 本地模型失敗 | 無雲端備援 → 重試一次 | model=qwen-35b-uncensored:latest
+2026-06-30 18:46:46 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-06-30 18:48:20 | INFO    | main | chat reply | provider=local-retry-failed model=qwen-35b-uncensored:latest len=47 reply=(她微微蹙眉，指尖輕敲了兩下) 本地模型暫時無回應…再試一次好嗎？
+(ReadTimeout)
+2026-07-01 03:41:28 | INFO    | main | chat request | user=demo_user provider=local model=qwen-35b-uncensored:latest fast=False msg=換場景
+2026-07-01 03:41:30 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 03:41:30 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 03:41:30 | INFO    | main | chat request | user=demo_user provider=local model=qwen-35b-uncensored:latest fast=False msg=fase
+2026-07-01 03:41:32 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 03:41:32 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 03:41:32 | INFO    | main | chat request | user=demo_user provider=local model=qwen-35b-uncensored:latest fast=False msg=拍拍肩
+2026-07-01 03:41:33 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 03:41:33 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 03:41:34 | ERROR   | ai_engine | API 錯誤 | provider=local model=qwen-35b-uncensored:latest error=Client error '400 Bad Request' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400 trace=s.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '400 Bad Request' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+
+2026-07-01 03:41:34 | WARNING | ai_engine | 本地模型失敗 | 無雲端備援 → 重試一次 | model=qwen-35b-uncensored:latest
+2026-07-01 03:41:34 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 03:41:34 | ERROR   | ai_engine | API 錯誤 | provider=local model=qwen-35b-uncensored:latest error=Client error '400 Bad Request' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400 trace=s.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '400 Bad Request' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+
+2026-07-01 03:41:34 | WARNING | ai_engine | 本地模型失敗 | 無雲端備援 → 重試一次 | model=qwen-35b-uncensored:latest
+2026-07-01 03:41:34 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 03:43:04 | ERROR   | ai_engine | API 錯誤 | provider=local model=qwen-35b-uncensored:latest error= trace=n\Python311\Lib\contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "C:\Users\User\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\httpx\_transports\default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ReadTimeout
+
+2026-07-01 03:43:04 | WARNING | ai_engine | 本地模型失敗 | 無雲端備援 → 重試一次 | model=qwen-35b-uncensored:latest
+2026-07-01 03:43:04 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 03:43:04 | INFO    | main | chat reply | provider=local-retry-failed model=qwen-35b-uncensored:latest len=51 reply=(她微微蹙眉，指尖輕敲了兩下) 本地模型暫時無回應…再試一次好嗎？
+(HTTPStatusError
+2026-07-01 03:43:05 | INFO    | main | chat reply | provider=local-retry-failed model=qwen-35b-uncensored:latest len=51 reply=(她微微蹙眉，指尖輕敲了兩下) 本地模型暫時無回應…再試一次好嗎？
+(HTTPStatusError
+2026-07-01 03:44:26 | INFO    | ai_engine | API 成功 | provider=local model=qwen-35b-uncensored:latest elapsed=82.44s len=165
+2026-07-01 03:44:26 | INFO    | main | chat reply | provider=local model=qwen-35b-uncensored:latest len=165 reply=(指尖輕輕推開半掩的窗櫺，夜風捲著微涼的潮氣漫進室內。我順勢倒退半步，將你牽入柔軟的沙發圈中，隨即將
+2026-07-01 03:46:05 | INFO    | main | chat request | user=demo_user provider=local model=qwen-35b-uncensored:latest fast=True msg=嗨，你好嗎？
+2026-07-01 03:46:06 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 03:46:06 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 03:46:19 | INFO    | ai_engine | API 成功 | provider=local model=qwen-35b-uncensored:latest elapsed=12.78s reasoning_fallback=Here's a thinking process:
+
+1.  **Analyze User Input:**
+   - User says: "嗨，你好嗎？" (Hi, how are you?)
+
+2026-07-01 03:46:19 | INFO    | main | chat reply | provider=local model=qwen-35b-uncensored:latest len=787 reply=Here's a thinking process:
+
+1.  **Analyze User Inp
+2026-07-01 03:46:19 | INFO    | main | chat request | user=demo_user provider=local model=qwen-35b-uncensored:latest fast=True msg=簡單說一句話
+2026-07-01 03:46:21 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 03:46:21 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 03:46:34 | INFO    | ai_engine | API 成功 | provider=local model=qwen-35b-uncensored:latest elapsed=13.23s reasoning_fallback=Here's a thinking process:
+
+1.  **Analyze User Input:**
+   - User says: "簡單說一句話" (Just say one sente
+2026-07-01 03:46:34 | INFO    | main | chat reply | provider=local model=qwen-35b-uncensored:latest len=809 reply=Here's a thinking process:
+
+1.  **Analyze User Inp
+2026-07-01 04:28:53 | INFO    | main | chat request | user=demo_user provider=local model=qwen-35b-uncensored:latest fast=False msg=65
+2026-07-01 04:28:54 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 04:28:54 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 04:28:55 | ERROR   | ai_engine | API 錯誤 | provider=local model=qwen-35b-uncensored:latest error=Client error '400 Bad Request' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400 trace=s.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '400 Bad Request' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+
+2026-07-01 04:28:55 | WARNING | ai_engine | 本地模型失敗 | 無雲端備援 → 重試一次 | model=qwen-35b-uncensored:latest
+2026-07-01 04:28:55 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 04:30:25 | INFO    | main | chat reply | provider=local-retry-failed model=qwen-35b-uncensored:latest len=51 reply=(她微微蹙眉，指尖輕敲了兩下) 本地模型暫時無回應…再試一次好嗎？
+(HTTPStatusError
+2026-07-01 04:45:06 | INFO    | main | chat request | user=demo_user provider=local model=qwen-35b-uncensored:latest fast=False msg=嗨，你好嗎？
+2026-07-01 04:45:07 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 04:45:07 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 04:46:38 | ERROR   | ai_engine | API 錯誤 | provider=local model=qwen-35b-uncensored:latest error= trace=n\Python311\Lib\contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "C:\Users\User\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\httpx\_transports\default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ReadTimeout
+
+2026-07-01 04:46:38 | WARNING | ai_engine | 本地模型失敗 | 無雲端備援 → 重試一次 | model=qwen-35b-uncensored:latest
+2026-07-01 04:46:38 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 04:46:39 | INFO    | main | chat request | user=demo_user provider=local model=qwen-35b-uncensored:latest fast=False msg=嗨
+2026-07-01 04:46:40 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 04:46:40 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 04:46:59 | INFO    | main | === Cyber Companion 後端啟動 port=8002 ===
+2026-07-01 04:46:59 | INFO    | main | 目前選定模型: local:qwythos-q4
+2026-07-01 04:47:05 | INFO    | main | chat request | user=demo_user provider=local model=qwen-35b-uncensored:latest fast=False msg=嗨，你好嗎？
+2026-07-01 04:47:07 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 04:47:07 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 04:48:08 | INFO    | main | chat reply | provider=local-retry-failed model=qwen-35b-uncensored:latest len=47 reply=(她微微蹙眉，指尖輕敲了兩下) 本地模型暫時無回應…再試一次好嗎？
+(ReadTimeout)
+2026-07-01 04:48:11 | ERROR   | ai_engine | API 錯誤 | provider=local model=qwen-35b-uncensored:latest error= trace=n\Python311\Lib\contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "C:\Users\User\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\httpx\_transports\default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ReadTimeout
+
+2026-07-01 04:48:11 | WARNING | ai_engine | 本地模型失敗 | 無雲端備援 → 重試一次 | model=qwen-35b-uncensored:latest
+2026-07-01 04:48:11 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 04:48:37 | ERROR   | ai_engine | API 錯誤 | provider=local model=qwen-35b-uncensored:latest error= trace=n\Python311\Lib\contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "C:\Users\User\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\httpx\_transports\default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ReadTimeout
+
+2026-07-01 04:48:37 | WARNING | ai_engine | 本地模型失敗 | 無雲端備援 → 重試一次 | model=qwen-35b-uncensored:latest
+2026-07-01 04:48:37 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 04:49:41 | INFO    | main | chat reply | provider=local-retry-failed model=qwen-35b-uncensored:latest len=47 reply=(她微微蹙眉，指尖輕敲了兩下) 本地模型暫時無回應…再試一次好嗎？
+(ReadTimeout)
+2026-07-01 04:50:08 | INFO    | main | chat reply | provider=local-retry-failed model=qwen-35b-uncensored:latest len=47 reply=(她微微蹙眉，指尖輕敲了兩下) 本地模型暫時無回應…再試一次好嗎？
+(ReadTimeout)
+2026-07-01 05:05:31 | INFO    | main | chat request | user=demo_user provider=local model=qwen-35b-uncensored:latest fast=False msg=test
+2026-07-01 05:05:32 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 05:05:32 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 05:06:05 | INFO    | main | chat request | user=demo_user provider=local model=qwen-35b-uncensored:latest fast=False msg=test
+2026-07-01 05:06:06 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 05:06:06 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 05:06:46 | INFO    | main | chat request | user=demo_user provider=local model=qwen-35b-uncensored:latest fast=False msg=test
+2026-07-01 05:06:48 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 05:06:48 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 05:07:02 | ERROR   | ai_engine | API 錯誤 | provider=local model=qwen-35b-uncensored:latest error= trace=n\Python311\Lib\contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "C:\Users\User\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\httpx\_transports\default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ReadTimeout
+
+2026-07-01 05:07:02 | WARNING | ai_engine | 本地模型失敗 | 無雲端備援 → 重試一次 | model=qwen-35b-uncensored:latest
+2026-07-01 05:07:02 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 05:07:37 | ERROR   | ai_engine | API 錯誤 | provider=local model=qwen-35b-uncensored:latest error= trace=n\Python311\Lib\contextlib.py", line 158, in __exit__
+    self.gen.throw(typ, value, traceback)
+  File "C:\Users\User\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\httpx\_transports\default.py", line 118, in map_httpcore_exceptions
+    raise mapped_exc(message) from exc
+httpx.ReadTimeout
+
+2026-07-01 05:07:37 | WARNING | ai_engine | 本地模型失敗 | 無雲端備援 → 重試一次 | model=qwen-35b-uncensored:latest
+2026-07-01 05:07:37 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 05:08:17 | INFO    | ai_engine | API 成功 | provider=local model=qwen-35b-uncensored:latest elapsed=89.03s len=58
+2026-07-01 05:08:17 | INFO    | main | chat reply | provider=local model=qwen-35b-uncensored:latest len=58 reply=(微微傾身靠近，指尖輕輕勾住你的衣角，眼波裡漾起溫柔的笑意) 測試已讀取完畢……那麼，接下來要讓我一
+2026-07-01 05:08:33 | INFO    | main | chat reply | provider=local-retry-failed model=qwen-35b-uncensored:latest len=47 reply=(她微微蹙眉，指尖輕敲了兩下) 本地模型暫時無回應…再試一次好嗎？
+(ReadTimeout)
+2026-07-01 05:09:07 | INFO    | main | chat reply | provider=local-retry-failed model=qwen-35b-uncensored:latest len=47 reply=(她微微蹙眉，指尖輕敲了兩下) 本地模型暫時無回應…再試一次好嗎？
+(ReadTimeout)
+2026-07-01 07:30:11 | INFO    | main | chat request | user=test_quick provider=local model=qwen-35b-uncensored:latest fast=True msg=嗨
+2026-07-01 07:30:12 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 07:30:12 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 07:30:33 | INFO    | main | chat request | user=test_quick provider=local model=qwen-35b-uncensored:latest fast=True msg=嗨
+2026-07-01 07:30:34 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 07:30:34 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 07:30:46 | INFO    | ai_engine | API 成功 | provider=local model=qwen-35b-uncensored:latest elapsed=34.27s reasoning_fallback=Here's a thinking process:
+
+1.  **Analyze User Input:**
+   - User says: "嗨" (Hi)
+   - Context: Two c
+2026-07-01 07:30:46 | INFO    | main | chat reply | provider=local model=qwen-35b-uncensored:latest len=790 reply=Here's a thinking process:
+
+1.  **Analyze User Inp
+2026-07-01 07:30:49 | INFO    | main | chat request | user=test_quick provider=local model=qwen-35b-uncensored:latest fast=True msg=嗨
+2026-07-01 07:30:50 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 07:30:50 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 07:30:58 | INFO    | ai_engine | API 成功 | provider=local model=qwen-35b-uncensored:latest elapsed=23.39s reasoning_fallback=Here's a thinking process:
+
+1.  **Analyze User Input:**
+   - User says: "嗨" (Hi)
+   - Current relati
+2026-07-01 07:30:58 | INFO    | main | chat reply | provider=local model=qwen-35b-uncensored:latest len=942 reply=Here's a thinking process:
+
+1.  **Analyze User Inp
+2026-07-01 07:31:09 | INFO    | ai_engine | API 成功 | provider=local model=qwen-35b-uncensored:latest elapsed=18.80s reasoning_fallback=Here's a thinking process:
+
+1.  **Analyze User Input:**
+   - User says: "嗨" (Hi)
+   - Current relati
+2026-07-01 07:31:09 | INFO    | main | chat reply | provider=local model=qwen-35b-uncensored:latest len=1036 reply=Here's a thinking process:
+
+1.  **Analyze User Inp
+2026-07-01 07:31:12 | INFO    | main | chat request | user=test1 provider=local model=qwen-35b-uncensored:latest fast=True msg=嗨
+2026-07-01 07:31:13 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 07:31:13 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 07:31:25 | INFO    | ai_engine | API 成功 | provider=local model=qwen-35b-uncensored:latest elapsed=11.89s reasoning_fallback=Here's a thinking process:
+
+1.  **Analyze User Input:**
+   - User says: "嗨" (Hi)
+   - No specific co
+2026-07-01 07:31:25 | INFO    | main | chat reply | provider=local model=qwen-35b-uncensored:latest len=913 reply=Here's a thinking process:
+
+1.  **Analyze User Inp
+2026-07-01 07:58:54 | INFO    | main | chat request | user=test provider=deepseek model=qwen-35b-uncensored:latest fast=False msg=用一句話自我介紹
+2026-07-01 07:58:55 | INFO    | ai_engine | generate_reply | provider=local model=qwen-35b-uncensored:latest kind=local
+2026-07-01 07:58:55 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions
+2026-07-01 07:58:56 | ERROR   | ai_engine | API 錯誤 | provider=local model=qwen-35b-uncensored:latest error=Client error '400 Bad Request' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400 trace=s.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '400 Bad Request' for url 'http://localhost:11434/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+
+2026-07-01 07:58:56 | WARNING | ai_engine | 本地模型失敗 | 無雲端備援 → 重試一次 | model=qwen-35b-uncensored:latest
+2026-07-01 07:58:56 | INFO    | ai_engine | API 調用 | provider=local model=qwen-35b-uncensored:latest endpoint=http://localhost:11434/v1/chat/completions

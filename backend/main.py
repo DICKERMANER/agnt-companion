@@ -127,7 +127,17 @@ def serialize_current_model() -> dict:
 
 @app.get("/health")
 def health() -> dict:
-    return {"ok": True}
+    import os
+    keys = ["DEEPSEEK_API_KEY", "OPENROUTER_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY"]
+    env_status = {k: f"SET (len={len(os.getenv(k, ''))})" if os.getenv(k) else "NOT SET" for k in keys}
+    return {"ok": True, "env": env_status}
+
+
+@app.get("/debug/env")
+def debug_env() -> dict:
+    import os
+    keys = ["DEEPSEEK_API_KEY", "OPENROUTER_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY"]
+    return {k: f"SET (len={len(os.getenv(k, ''))})" if os.getenv(k) else "NOT SET" for k in keys}
 
 
 @app.get("/state/{user_id}")

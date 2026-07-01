@@ -106,12 +106,14 @@ async def call_openai_compatible(
     }
     # 將 runtime_options 注入 payload
     if runtime_options:
-        if runtime_options.get("thinking_enabled"):
-            payload["thinking"] = {"type": "enabled"}
+        # DeepSeek 不支援 reasoning_effort（只 deepseek-reasoner 有），避免 400
+        if provider not in ("deepseek",):
+            if runtime_options.get("thinking_enabled"):
+                payload["thinking"] = {"type": "enabled"}
+            if runtime_options.get("reasoning_effort"):
+                payload["reasoning_effort"] = runtime_options["reasoning_effort"]
         if runtime_options.get("fast_mode"):
             payload["max_tokens"] = 256
-        if runtime_options.get("reasoning_effort"):
-            payload["reasoning_effort"] = runtime_options["reasoning_effort"]
     headers = {"Content-Type": "application/json"}
     if api_key:
         headers["Authorization"] = f"Bearer {api_key}"
@@ -233,14 +235,17 @@ async def generate_reply(
             )
         except Exception as e:
             if model_choice.kind != "local":
-                # API 模型失敗（429 / 超時 / key 無效等）→ 不回傳崩潰，改回傳友善錯誤訊息
+                # API 模型失敗 → 抓出實際 HTTP status
                 err_msg = str(e)
-                if "429" in err_msg:
+                status_code = ""
+                if hasattr(e, 'response') and hasattr(e.response, 'status_code'):
+                    status_code = f" (HTTP {e.response.status_code})"
+                if "429" in err_msg or "429" in status_code:
                     hint = "模型暫時被限流（429），請稍後重試或切換其他模型。"
                 elif "401" in err_msg or "403" in err_msg:
                     hint = "API key 無效或權限不足，請檢查環境變數。"
                 else:
-                    hint = f"API 模型呼叫失敗：{type(e).__name__}"
+                    hint = f"API 模型呼叫失敗：{type(e).__name__}{status_code}"
                 return EngineResponse(
                     text=f"(她微微蹙眉，指尖輕敲了兩下) {hint}",
                     provider=f"{model_choice.provider}-error",
