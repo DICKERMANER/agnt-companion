@@ -13,10 +13,13 @@ from ai_engine import (
     generate_reply,
     map_relationship_stage,
     sentiment_delta,
+    stage_instruction,
+    soul_block,
 )
 from database import Companion, User, get_db, init_db
 from model_registry import get_model_by_id, get_model_choices
-from ai_router import route_model
+from ai_router import route_model, classify_task
+import prompt_router
 from monetization import INSUFFICIENT_BALANCE_MESSAGE, consume_one_diamond
 import persona_store
 from soul_manager import (
@@ -68,6 +71,7 @@ class ChatResponse(BaseModel):
     avatar: str = "👑"
     routed_task: str | None = None   # AI Router 判定的任務類型
     routed_reason: str | None = None  # AI Router 選擇理由
+    routed_prompt: str | None = None  # Prompt Router 載入的 template 名稱
 
 
 class ModelSwitchRequest(BaseModel):
@@ -180,6 +184,25 @@ def list_models() -> dict:
     }
 
 
+@app.get("/prompts")
+def list_prompts() -> dict:
+    """列出所有任務類型的 Prompt Template 狀態（Phase 2 Prompt Router）。"""
+    return {
+        "prompts": prompt_router.list_available_prompts(),
+        "prompts_dir": prompt_router.PROMPTS_DIR,
+    }
+
+
+@app.get("/prompts/{task_type}")
+def get_prompt(task_type: str) -> dict:
+    """取得某任務類型實際載入的 Prompt Template 內容。"""
+    return {
+        "task_type": task_type,
+        "template": prompt_router.get_task_prompt(task_type),
+        "system_base": prompt_router.get_system_base(),
+    }
+
+
 @app.get("/souls")
 def list_souls() -> dict:
     souls = load_all_souls()
@@ -286,6 +309,13 @@ async def webhook_chat(payload: ChatRequest, db: Session = Depends(get_db)) -> C
             # 路由失敗絕不能擋住聊天 → 沿用當前模型
             pass
 
+    # auto_route 關閉時仍需知道任務類型（給 Prompt Router 選 template）
+    if routed_task is None:
+        try:
+            routed_task = classify_task(payload.message).task_type
+        except Exception:
+            routed_task = "roleplay"  # sexline 預設情境
+
     if not consume_one_diamond(db, user):
         return ChatResponse(
             reply=INSUFFICIENT_BALANCE_MESSAGE,
@@ -308,7 +338,6 @@ async def webhook_chat(payload: ChatRequest, db: Session = Depends(get_db)) -> C
     db.refresh(companion)
 
     active_soul = get_soul(companion.soul_id)
-    system_prompt = build_dynamic_system_prompt(companion.relationship_stage, active_soul)
     user_message = payload.message
     if payload.action_prompt:
         user_message = f"[快捷操作]{payload.action_prompt}\n[用戶訊息]{payload.message}"
@@ -317,11 +346,29 @@ async def webhook_chat(payload: ChatRequest, db: Session = Depends(get_db)) -> C
     if not persona_profile and persona_store.has_saved_persona():
         persona_profile = persona_store.load_persona()
 
+    # ── Prompt Router：依任務類型載入對應的模組化 Prompt Template ──
+    persona_block = None
     if persona_profile:
-        system_prompt = f"角色名稱: {persona_profile.get('name')}\n" \
-                        f"生日: {persona_profile.get('birthday')}\n" \
-                        f"性格核心: {persona_profile.get('personality')}\n\n" \
-                        f"{system_prompt}"
+        persona_block = (
+            f"角色名稱: {persona_profile.get('name')}\n"
+            f"生日: {persona_profile.get('birthday')}\n"
+            f"性格核心: {persona_profile.get('personality')}"
+        )
+
+    try:
+        system_prompt = prompt_router.build_system_prompt(
+            routed_task,
+            stage_prompt=stage_instruction(companion.relationship_stage),
+            soul_block=soul_block(active_soul),
+            persona_block=persona_block,
+        )
+        routed_prompt = f"{routed_task}.md"
+    except Exception:
+        # Prompt Router 失敗 → fallback 回舊的硬編組裝，絕不擋聊天
+        system_prompt = build_dynamic_system_prompt(companion.relationship_stage, active_soul)
+        if persona_block:
+            system_prompt = f"{persona_block}\n\n{system_prompt}"
+        routed_prompt = "fallback:build_dynamic_system_prompt"
 
     ai_result = await generate_reply(
         system_prompt,
@@ -350,6 +397,7 @@ async def webhook_chat(payload: ChatRequest, db: Session = Depends(get_db)) -> C
         avatar=active_soul.avatar,
         routed_task=routed_task,
         routed_reason=routed_reason,
+        routed_prompt=routed_prompt,
     )
 
 

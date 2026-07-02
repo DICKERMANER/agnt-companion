@@ -58,13 +58,28 @@ def map_relationship_stage(favorability_score: int) -> str:
     return "lover"
 
 
-def build_dynamic_system_prompt(stage: str, soul) -> str:
-    stage_prompt = {
+def stage_instruction(stage: str) -> str:
+    """關係階段對應的語氣指令（供 prompt_router 組裝 roleplay system prompt）。"""
+    return {
         "cold": "你現在與使用者關係偏冷淡，語氣克制但不失禮。",
         "flirty": "你與使用者進入曖昧期，語氣更親近，偶爾主動關心。",
         "devoted": "你對使用者有明顯依賴與信任感，互動熱度明顯提升。",
         "lover": "你與使用者處於完全熱戀狀態，語氣深情且有強烈陪伴感。",
     }.get(stage, "你與使用者維持穩定陪伴關係。")
+
+
+def soul_block(soul) -> str:
+    """把 Soul 物件轉成角色設定區塊（供 prompt_router 使用）。"""
+    return (
+        f"角色名稱: {soul.name}\n"
+        f"生日: {soul.birthday} ({soul.zodiac})\n"
+        f"性格核心: {soul.personality}\n"
+        f"底層設定: {soul.system_prompt_base}"
+    )
+
+
+def build_dynamic_system_prompt(stage: str, soul) -> str:
+    stage_prompt = stage_instruction(stage)
 
     embody_rule = (
         "每次回覆都必須使用 embody 模式："

@@ -223,6 +223,52 @@ def test_set_diamonds_lets_user_input_balance() -> None:
     assert_true(bad.status_code == 422, "negative diamonds should be rejected")
 
 
+def test_prompts_endpoint_lists_all_templates() -> None:
+    response = client.get("/prompts")
+    assert_true(response.status_code == 200, "prompts endpoint should return 200")
+    data = response.json()["prompts"]
+    from ai_router import ALL_TASKS
+    for task in ALL_TASKS:
+        assert_true(data.get(task) is True, f"prompt template for '{task}' should exist")
+    assert_true(data.get("_base:system.md") is True, "system.md base should exist")
+
+
+def test_prompt_router_selects_template_per_task() -> None:
+    from ai_router import ALL_TASKS
+    for task in ALL_TASKS:
+        response = client.get(f"/prompts/{task}")
+        assert_true(response.status_code == 200, f"/prompts/{task} should return 200")
+        template = response.json()["template"]
+        assert_true(len(template) > 20, f"template for '{task}' should have content")
+
+
+def test_chat_routes_to_correct_prompt_template() -> None:
+    """webhook 依訊息內容選對 Prompt Template（Phase 2 端到端）。"""
+    cases = {
+        "translate": "幫我把這句翻譯成英文：你好",
+        "debug": "程式噴 error traceback",
+        "financial": "台積電股價會漲嗎",
+        "python": "寫一個 python 腳本",
+        "roleplay": "寶貝抱抱我",
+        "chat": "晚餐吃什麼",
+    }
+    for i, (expected_task, msg) in enumerate(cases.items()):
+        response = client.post(
+            "/webhook/chat",
+            json={"user_id": f"prompt_route_{i}", "message": msg, "auto_route": True},
+        )
+        assert_true(response.status_code == 200, f"chat should succeed for '{expected_task}'")
+        data = response.json()
+        assert_true(
+            data["routed_task"] == expected_task,
+            f"'{msg}' should route to task '{expected_task}', got '{data['routed_task']}'",
+        )
+        assert_true(
+            data["routed_prompt"] == f"{expected_task}.md",
+            f"'{msg}' should load '{expected_task}.md', got '{data['routed_prompt']}'",
+        )
+
+
 if __name__ == "__main__":
     for test in [
         test_models_endpoint_lists_hermes_like_choices,
@@ -238,6 +284,9 @@ if __name__ == "__main__":
         test_persona_endpoint_saves_custom_soul_profile,
         test_chat_injects_persona_and_runtime_options_without_real_llm,
         test_set_diamonds_lets_user_input_balance,
+        test_prompts_endpoint_lists_all_templates,
+        test_prompt_router_selects_template_per_task,
+        test_chat_routes_to_correct_prompt_template,
     ]:
         test()
         print(f"PASS {test.__name__}")
