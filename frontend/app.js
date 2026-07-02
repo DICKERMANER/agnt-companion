@@ -595,7 +595,8 @@ async function importSoulFromFile(file) {
   }
 }
 
-openPersonaDrawerBtn?.addEventListener("click", openPersonaDrawer);`r`nheaderAvatar?.addEventListener("click", openPersonaDrawer);
+openPersonaDrawerBtn?.addEventListener("click", openPersonaDrawer);
+headerAvatar?.addEventListener("click", openPersonaDrawer);
 closePersonaDrawerBtn.addEventListener("click", closePersonaPanel);
 personaDrawerBackdrop.addEventListener("click", closePersonaPanel);
 savePersonaBtn.addEventListener("click", savePersona);
