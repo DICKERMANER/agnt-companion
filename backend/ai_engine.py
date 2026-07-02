@@ -139,6 +139,29 @@ async def call_openai_compatible(
         data = resp.json()
         message = data.get("choices", [{}])[0].get("message", {})
         text = (message.get("content") or "").strip()
+        # DeepSeek / Qwen reasoning 變體：content 以 "Here's a thinking" 開頭 → 思考過程洩漏
+        # 先 retry 極小 token，不行就從 Draft 段擷取
+        if text.startswith("Here's a thinking"):
+            retry_payload = {**payload, "max_tokens": 64, "temperature": 1.0}
+            try:
+                async with httpx.AsyncClient(timeout=90.0) as retry_client:
+                    retry_resp = await retry_client.post(endpoint, headers=headers, json=retry_payload)
+                    retry_resp.raise_for_status()
+                    retry_data = retry_resp.json()
+                    retry_message = retry_data.get("choices", [{}])[0].get("message", {})
+                    retry_text = (retry_message.get("content") or "").strip()
+                    if retry_text and not retry_text.startswith("Here's a thinking"):
+                        return EngineResponse(text=retry_text, provider=provider, model=model)
+            except Exception:
+                pass
+            # 最終 fallback：從 Draft 段之後擷取，格式為 "Draft ... \n   Need to ..."
+            # 取最後一段有意義的文字當回覆
+            import re
+            draft = re.split(r'\*?\*?Draft[^*]+\*?\*?\s*\n', text)
+            if len(draft) > 1:
+                fallback = draft[-1].strip()
+                if len(fallback) > 10:
+                    text = "嗨～" + fallback[:80]
         if not text:
             reasoning = (message.get("reasoning") or "").strip()
             finish_reason = data.get("choices", [{}])[0].get("finish_reason", "unknown")
