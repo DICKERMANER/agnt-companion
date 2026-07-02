@@ -68,7 +68,7 @@ let souls = [];
 let pendingActionPrompt = "";
 let modelRuntimeOptions = {
   thinking_enabled: false,
-  fast_mode: false,
+  fast_mode: true,
   reasoning_effort: "medium"
 };
 
