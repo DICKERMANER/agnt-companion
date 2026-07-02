@@ -139,38 +139,11 @@ async def call_openai_compatible(
         data = resp.json()
         message = data.get("choices", [{}])[0].get("message", {})
         text = (message.get("content") or "").strip()
-        # DeepSeek / Qwen reasoning 變體：content 以 "Here's a thinking" 開頭 → 思考過程洩漏
-        # 先 retry 極小 token，不行就從 Draft 段擷取
-        if text.startswith("Here's a thinking"):
-            retry_payload = {**payload, "max_tokens": 64, "temperature": 1.0}
-            try:
-                async with httpx.AsyncClient(timeout=90.0) as retry_client:
-                    retry_resp = await retry_client.post(endpoint, headers=headers, json=retry_payload)
-                    retry_resp.raise_for_status()
-                    retry_data = retry_resp.json()
-                    retry_message = retry_data.get("choices", [{}])[0].get("message", {})
-                    retry_text = (retry_message.get("content") or "").strip()
-                    if retry_text and not retry_text.startswith("Here's a thinking"):
-                        return EngineResponse(text=retry_text, provider=provider, model=model)
-            except Exception:
-                pass
-            # 最終 fallback：從 Draft 段之後擷取，格式為 "Draft ... \n   Need to ..."
-            # 取最後一段有意義的文字當回覆
-            import re
-            draft = re.split(r'\*?\*?Draft[^*]+\*?\*?\s*\n', text)
-            if len(draft) > 1:
-                fallback = draft[-1].strip()
-                if len(fallback) > 10:
-                    text = "嗨～" + fallback[:80]
         if not text:
             reasoning = (message.get("reasoning") or "").strip()
             finish_reason = data.get("choices", [{}])[0].get("finish_reason", "unknown")
-            # Qwen reasoning 模型：content 為空但 reasoning 有內容 → 直接用 reasoning 當回覆
-            if reasoning:
-                return EngineResponse(text=reasoning, provider=provider, model=model)
-            # 有些 Ollama / reasoning 模型會只吐 reasoning、不吐 content；前後端看起來就像「按鈕沒反應」。
-            # 這裡自動重試一次，加上 max_tokens 強制模型吐出 content。
-            retry_payload = {**payload, "max_tokens": 512}
+            # 先 retry 嘗試拿到 content
+            retry_payload = {**payload, "max_tokens": 256}
             try:
                 async with httpx.AsyncClient(timeout=90.0) as retry_client:
                     retry_resp = await retry_client.post(endpoint, headers=headers, json=retry_payload)
@@ -182,14 +155,28 @@ async def call_openai_compatible(
                         return EngineResponse(text=retry_text, provider=provider, model=model)
             except Exception:
                 pass
-            text = (
-                f"(她停頓了一下，低頭確認模型狀態) 模型已連接，但這次沒有產生正式回覆 content。"
-                f"\n模型：{model}"
-                f"\n結束原因：{finish_reason}"
-                f"\n診斷：請切換非 reasoning 模型（如 Qwen-35B），或重試一次。"
-            )
+            # reasoning 存在 → 嘗試從中擷取真正回覆（DeepSeek/Qwen 思考洩漏情境）
             if reasoning:
-                text += f"\n模型只輸出了 reasoning 片段：{reasoning[:180]}..."
+                import re
+                # 策略：找 reasoning 中最後一句看起來像對話的句子
+                # 優先找引號內文字 → Draft 段之後 → 最後一個非思考性的句子
+                quoted = re.findall(r'「(.+?)」|\"(.+?)\"|"(.+?)"', reasoning)
+                if quoted:
+                    for q in quoted[-1]:
+                        if q and len(q) > 5:
+                            return EngineResponse(text=q[:150], provider=provider, model=model)
+                # 找 Draft / Response / 回覆 之後的文字
+                draft = re.split(r'(?:Draft|Response|回覆|回覆).*?\n', reasoning)
+                if len(draft) > 1 and len(draft[-1].strip()) > 5:
+                    return EngineResponse(text=draft[-1].strip()[:150], provider=provider, model=model)
+                # Qwen 的 reasoning 通常就是真正回覆 → 直接用
+                if len(reasoning) < 200:
+                    return EngineResponse(text=reasoning, provider=provider, model=model)
+                # DeepSeek 長篇思考 → 取最後一段
+                paragraphs = [p.strip() for p in reasoning.split('\n') if p.strip() and len(p.strip()) > 10]
+                if paragraphs:
+                    return EngineResponse(text=paragraphs[-1][:150], provider=provider, model=model)
+            # 完全沒內容
         return EngineResponse(text=text, provider=provider, model=model)
 
 
