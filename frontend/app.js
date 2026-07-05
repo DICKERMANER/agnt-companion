@@ -314,7 +314,8 @@ async function sendMessage(overridePayload = null) {
     thinking_enabled: modelRuntimeOptions.thinking_enabled,
     fast_mode: modelRuntimeOptions.fast_mode,
     reasoning_effort: modelRuntimeOptions.reasoning_effort,
-    persona_profile: currentPersonaProfile || null
+    persona_profile: currentPersonaProfile || null,
+    auto_route: selectedModelId ? false : true
   };
 
   pendingActionPrompt = "";
