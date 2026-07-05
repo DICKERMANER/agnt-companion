@@ -307,10 +307,13 @@ async function sendMessage(overridePayload = null) {
 
   syncModelRuntimeControls();
 
+  // 從 selectedModelId 推導 provider（不再寫死 "local"）
+  const providerFromModel = selectedModelId ? selectedModelId.split(":")[0] : "local";
+
   const payload = overridePayload || {
     user_id: USER_ID,
     message,
-    provider: "local",
+    provider: providerFromModel,
     thinking_enabled: modelRuntimeOptions.thinking_enabled,
     fast_mode: modelRuntimeOptions.fast_mode,
     reasoning_effort: modelRuntimeOptions.reasoning_effort,

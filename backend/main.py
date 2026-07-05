@@ -104,7 +104,9 @@ def on_startup() -> None:
     if CURRENT_MODEL_ID is None:
         choices = get_model_choices()
         if choices:
-            CURRENT_MODEL_ID = choices[0].id
+            # 預設選雲端模型（deepseek flash），不要選可能掛掉的本地模型
+            cloud_choices = [c for c in choices if c.kind != "local"]
+            CURRENT_MODEL_ID = cloud_choices[0].id if cloud_choices else choices[0].id
 
 
 def get_or_create_user_bundle(db: Session, user_id: str) -> tuple[User, Companion]:
