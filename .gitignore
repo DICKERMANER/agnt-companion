@@ -10,6 +10,9 @@ backend/persona_profiles.json
 # Env
 .env
 
+# Logs
+backend/logs/
+
 # OS
 .DS_Store
 Thumbs.db
