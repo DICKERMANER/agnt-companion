@@ -39,7 +39,7 @@ function testQuickActionParticles() {
   assert(app.includes('btn.addEventListener("click"'), 'quick action click handler should exist');
   assert(app.includes('spawnParticles(btn'), 'quick action click should spawn particles from clicked button');
   assert(app.includes('sendQuickAction'), 'quick action buttons should trigger an actual chat action');
-  assert(app.includes('sendMessage({'), 'quick actions should call sendMessage with an override payload');
+  assert(app.includes('sendMessage(buildChatPayload'), 'quick actions should call sendMessage with an override payload');
 }
 
 function testPersonaHaremUi() {

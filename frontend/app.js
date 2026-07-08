@@ -376,6 +376,24 @@ function syncModelRuntimeControls() {
   };
 }
 
+function currentChatProvider() {
+  return selectedModelId ? selectedModelId.split(":")[0] : "local";
+}
+
+function buildChatPayload(message, extras = {}) {
+  return {
+    user_id: USER_ID,
+    message,
+    provider: currentChatProvider(),
+    thinking_enabled: modelRuntimeOptions.thinking_enabled,
+    fast_mode: modelRuntimeOptions.fast_mode,
+    reasoning_effort: modelRuntimeOptions.reasoning_effort,
+    persona_profile: currentPersonaProfile || null,
+    auto_route: selectedModelId ? false : true,
+    ...extras,
+  };
+}
+
 async function sendMessage(overridePayload = null) {
   const message = overridePayload ? overridePayload.message : userInput.value.trim();
   if (!message && !overridePayload) return;
@@ -389,19 +407,7 @@ async function sendMessage(overridePayload = null) {
 
   syncModelRuntimeControls();
 
-  // 從 selectedModelId 推導 provider（不再寫死 "local"）
-  const providerFromModel = selectedModelId ? selectedModelId.split(":")[0] : "local";
-
-  const payload = overridePayload || {
-    user_id: USER_ID,
-    message,
-    provider: providerFromModel,
-    thinking_enabled: modelRuntimeOptions.thinking_enabled,
-    fast_mode: modelRuntimeOptions.fast_mode,
-    reasoning_effort: modelRuntimeOptions.reasoning_effort,
-    persona_profile: currentPersonaProfile || null,
-    auto_route: selectedModelId ? false : true
-  };
+  const payload = overridePayload || buildChatPayload(message);
 
   pendingActionPrompt = "";
 
@@ -478,16 +484,7 @@ closeModelDrawer.addEventListener("click", closeModelDrawerPanel);
 
 function sendQuickAction(btn, action, text) {
   spawnParticles(btn);
-  sendMessage({
-    user_id: USER_ID,
-    message: text,
-    provider: "local",
-    thinking_enabled: modelRuntimeOptions.thinking_enabled,
-    fast_mode: modelRuntimeOptions.fast_mode,
-    reasoning_effort: modelRuntimeOptions.reasoning_effort,
-    persona_profile: currentPersonaProfile || null,
-    action_prompt: action
-  });
+  sendMessage(buildChatPayload(text, { action_prompt: action }));
 }
 
 document.querySelectorAll(".line-quick-actions button").forEach((btn) => {
@@ -798,16 +795,10 @@ if (diamondsBalance?.parentElement) {
     reader.onload = () => {
       appendImageBubble("user", reader.result, file.name);
       // 傳給 AI：描述圖片 (純前端；可擴充為 multipart POST)
-      sendMessage({
-        user_id: USER_ID,
-        message: `（傳送了一張圖片：${file.name}）`,
-        provider: "local",
-        thinking_enabled: modelRuntimeOptions.thinking_enabled,
-        fast_mode: modelRuntimeOptions.fast_mode,
-        reasoning_effort: modelRuntimeOptions.reasoning_effort,
-        persona_profile: currentPersonaProfile || null,
-        action_prompt: "使用者傳來了一張圖片，請用角色口吻自然回應這件事。"
-      });
+      sendMessage(buildChatPayload(
+        `（傳送了一張圖片：${file.name}）`,
+        { action_prompt: "使用者傳來了一張圖片，請用角色口吻自然回應這件事。" }
+      ));
     };
     reader.readAsDataURL(file);
   }
@@ -819,16 +810,10 @@ if (diamondsBalance?.parentElement) {
     const file = e.target.files?.[0];
     if (!file) return;
     appendDocBubble("user", file.name, file.size);
-    sendMessage({
-      user_id: USER_ID,
-      message: `（傳送了一個文件：${file.name}，${(file.size/1024).toFixed(1)} KB）`,
-      provider: "local",
-      thinking_enabled: modelRuntimeOptions.thinking_enabled,
-      fast_mode: modelRuntimeOptions.fast_mode,
-      reasoning_effort: modelRuntimeOptions.reasoning_effort,
-      persona_profile: currentPersonaProfile || null,
-      action_prompt: "使用者傳來了一個文件，請用角色口吻自然回應這件事。"
-    });
+    sendMessage(buildChatPayload(
+      `（傳送了一個文件：${file.name}，${(file.size/1024).toFixed(1)} KB）`,
+      { action_prompt: "使用者傳來了一個文件，請用角色口吻自然回應這件事。" }
+    ));
     e.target.value = "";
   });
   // 點擊其他地方關閉媒體選單
@@ -903,16 +888,10 @@ function appendDocBubble(role, filename, size) {
       btn.textContent = emoji;
       btn.addEventListener("click", () => {
         if (stickerPanel) stickerPanel.hidden = true;
-        sendMessage({
-          user_id: USER_ID,
-          message: emoji,
-          provider: "local",
-          thinking_enabled: modelRuntimeOptions.thinking_enabled,
-          fast_mode: modelRuntimeOptions.fast_mode,
-          reasoning_effort: modelRuntimeOptions.reasoning_effort,
-          persona_profile: currentPersonaProfile || null,
-          action_prompt: `使用者傳了貼圖「${emoji}」，請用角色口吻自然回應這個表情。`
-        });
+        sendMessage(buildChatPayload(
+          emoji,
+          { action_prompt: `使用者傳了貼圖「${emoji}」，請用角色口吻自然回應這個表情。` }
+        ));
       });
       stickerGrid.appendChild(btn);
     });
@@ -951,16 +930,10 @@ function startVoiceRecording() {
       const blob = new Blob(_audioChunks, { type: "audio/webm" });
       appendAudioBubble("user", blob);
       appendSystemChip("🎙️ 語音訊息已傳送（AI 以文字回覆）");
-      sendMessage({
-        user_id: USER_ID,
-        message: "（傳送了一段語音訊息）",
-        provider: "local",
-        thinking_enabled: modelRuntimeOptions.thinking_enabled,
-        fast_mode: modelRuntimeOptions.fast_mode,
-        reasoning_effort: modelRuntimeOptions.reasoning_effort,
-        persona_profile: currentPersonaProfile || null,
-        action_prompt: "使用者傳來了語音訊息，請用角色口吻溫柔回應。"
-      });
+      sendMessage(buildChatPayload(
+        "（傳送了一段語音訊息）",
+        { action_prompt: "使用者傳來了語音訊息，請用角色口吻溫柔回應。" }
+      ));
     };
     _mediaRecorder.start();
     appendSystemChip("🔴 錄音中… 點選下方停止鍵結束");
