@@ -62,11 +62,19 @@ def _parse_markdown(soul_id: str, content: str) -> Soul:
     avatar = "👑"
     prompt_base = content
 
-    if content.startswith("---") and yaml:
+    if content.startswith("---"):
         parts = content.split("---", 2)
         if len(parts) >= 3:
             try:
-                frontmatter = yaml.safe_load(parts[1]) or {}
+                if yaml:
+                    frontmatter = yaml.safe_load(parts[1]) or {}
+                else:
+                    frontmatter = {}
+                    for line in parts[1].splitlines():
+                        if ":" not in line:
+                            continue
+                        key, value = line.split(":", 1)
+                        frontmatter[key.strip()] = value.strip().strip('"').strip("'")
                 name = frontmatter.get("name", name)
                 birthday = frontmatter.get("birthday", "")
                 zodiac = frontmatter.get("zodiac", "")

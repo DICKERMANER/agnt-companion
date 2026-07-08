@@ -1,32 +1,114 @@
 // --- 自動偵測 API 端點 ---
-// 本地開發 → localhost backend；同網域裝置 → 同 IP port 8000；GitHub Pages → 引導使用本地測試
+// 本地開發 → localhost backend；同網域裝置 → 同 IP port 8002；GitHub Pages → tunnel/手動設定
 const _host = location.hostname;
 const _isLoopback = _host === "127.0.0.1" || _host === "localhost" || _host === "0.0.0.0" || _host === "[::1]";
 
 // 判斷是否為私有 IP（區網內）：10.x.x.x, 172.16-31.x.x, 192.168.x.x
 const _isPrivateIP = /^(10\.\d{1,3}\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/.test(_host);
 
-const API_BASE = _isLoopback
+let API_BASE = _isLoopback
   ? "http://127.0.0.1:8002"
   : _isPrivateIP
     ? `http://${_host}:8002`   // 同網域內的手機/平板自動指向同一台電腦的後端
-    : (window.CYBER_COMPANION_BACKEND || "");  // GitHub Pages 需在 HTML 設定
+    : (localStorage.getItem("SEXLINE_API_BASE") || window.CYBER_COMPANION_BACKEND || "");
 
 const USER_ID = "demo_user";
 
-// 無後端時顯示醒目提示（立即執行，不等 DOMContentLoaded）
-(function showBackendWarning() {
-  if (_isLoopback || _isPrivateIP || API_BASE) return;
+function normalizeApiBase(value) {
+  return String(value || "").trim().replace(/\/+$/, "");
+}
+
+function backendCandidates() {
+  const candidates = [
+    localStorage.getItem("SEXLINE_API_BASE"),
+    window.CYBER_COMPANION_BACKEND,
+    API_BASE,
+  ];
+  if (_isLoopback) candidates.push("http://127.0.0.1:8002", "http://localhost:8002");
+  if (_isPrivateIP) candidates.push(`http://${_host}:8002`);
+  return [...new Set(candidates.map(normalizeApiBase).filter(Boolean))];
+}
+
+function showBackendWarning(message = "目前連不到 sexline API，請確認後端已啟動，或貼上 Cloudflare Tunnel 網址。") {
+  const existing = document.getElementById("backend-warning");
+  if (existing) existing.remove();
   const banner = document.createElement("div");
   banner.id = "backend-warning";
-  banner.style.cssText = "background:#ff9800;color:#000;padding:10px 16px;text-align:center;font-size:14px;font-weight:600;position:sticky;top:0;z-index:9999";
-  banner.textContent = "⚠️ GitHub Pages 無法連線本地後端。請在電腦瀏覽器開啟 http://127.0.0.1:5500 測試，或用手機連同一 WiFi 開啟 http://192.168.31.13:5500";
+  banner.style.cssText = "background:#ff9800;color:#000;padding:10px 12px;display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;font-size:13px;font-weight:600;position:fixed;left:0;right:0;top:0;z-index:9999";
+  banner.innerHTML = `
+    <span>${message}</span>
+    <input id="backendUrlInput" type="url" placeholder="https://你的-tunnel.trycloudflare.com" style="min-width:260px;max-width:90vw;padding:6px 8px;border:1px solid #c77;border-radius:8px" />
+    <button id="saveBackendUrlBtn" type="button" style="padding:6px 10px;border:0;border-radius:8px;background:#111827;color:#fff;font-weight:700">套用</button>
+  `;
   if (document.body) {
     document.body.prepend(banner);
   } else {
     document.addEventListener("DOMContentLoaded", () => document.body.prepend(banner), { once: true });
   }
-})();
+  window.setTimeout(() => {
+    const input = document.getElementById("backendUrlInput");
+    const button = document.getElementById("saveBackendUrlBtn");
+    if (input) input.value = normalizeApiBase(localStorage.getItem("SEXLINE_API_BASE") || window.CYBER_COMPANION_BACKEND || "");
+    button?.addEventListener("click", async () => {
+      const nextUrl = normalizeApiBase(input?.value);
+      if (!nextUrl) return;
+      localStorage.setItem("SEXLINE_API_BASE", nextUrl);
+      API_BASE = nextUrl;
+      try {
+        await fetchApi("/health", {}, 5000);
+        banner.remove();
+        appendSystemChip("API 連線已切換成功。");
+        loadModels();
+        loadState();
+      } catch (_) {
+        showBackendWarning("這個 API 網址仍連不上，請確認 tunnel 還在線上。");
+      }
+    });
+  }, 0);
+}
+
+async function checkBackend(url, timeoutMs = 2500) {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${url}/health`, { signal: controller.signal });
+    return res.ok;
+  } catch (_) {
+    return false;
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
+
+async function resolveApiBase() {
+  for (const candidate of backendCandidates()) {
+    if (await checkBackend(candidate)) {
+      API_BASE = candidate;
+      localStorage.setItem("SEXLINE_API_BASE", candidate);
+      document.getElementById("backend-warning")?.remove();
+      return candidate;
+    }
+  }
+  showBackendWarning();
+  return API_BASE;
+}
+
+const apiReady = resolveApiBase();
+
+async function fetchApi(path, options = {}, timeoutMs = 120000) {
+  await apiReady;
+  if (!API_BASE) throw new Error("API_BASE is not configured");
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(`${API_BASE}${path}`, {
+      ...options,
+      signal: options.signal || controller.signal,
+    });
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
 
 const chatWindow = document.getElementById("chatWindow");
 const userInput = document.getElementById("userInput");
@@ -186,7 +268,7 @@ function renderModels() {
 
 async function loadModels() {
   try {
-    const res = await fetch(`${API_BASE}/models`);
+    const res = await fetchApi(`/models`);
     const data = await res.json();
     models = data.models || [];
     selectedModelId = data.current_model?.id || models[0]?.id || null;
@@ -202,7 +284,7 @@ async function loadModels() {
 
 async function switchModel(modelId) {
   try {
-    const res = await fetch(`${API_BASE}/model`, {
+    const res = await fetchApi(`/model`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ model_id: modelId }),
@@ -252,7 +334,7 @@ function setState(data) {
 
 async function loadState() {
   try {
-    const res = await fetch(`${API_BASE}/state/${USER_ID}`);
+    const res = await fetchApi(`/state/${USER_ID}`);
     const data = await res.json();
     setState(data);
   } catch (err) {
@@ -272,7 +354,7 @@ async function promptSetDiamonds() {
     return;
   }
   try {
-    const res = await fetch(`${API_BASE}/state/${USER_ID}/diamonds`, {
+    const res = await fetchApi(`/state/${USER_ID}/diamonds`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ diamonds_balance: value })
@@ -328,7 +410,7 @@ async function sendMessage(overridePayload = null) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 120000);
     
-    const res = await fetch(`${API_BASE}/webhook/chat`, {
+    const res = await fetchApi(`/webhook/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -438,7 +520,7 @@ function fillPersonaForm({ name = "", birthday = "", soul = "", avatar = "" } = 
 // shows the character you're actually talking to, not a blank form.
 async function loadActivePersonaIntoForm() {
   try {
-    const res = await fetch(`${API_BASE}/persona`);
+    const res = await fetchApi(`/persona`);
     const data = await res.json();
     const persona = data.persona || {};
     if (persona.name) {
@@ -461,7 +543,7 @@ async function loadActivePersonaIntoForm() {
 
 async function loadSoulsList() {
   try {
-    const res = await fetch(`${API_BASE}/souls`);
+    const res = await fetchApi(`/souls`);
     if (!res.ok) throw new Error("souls list failed");
     const data = await res.json();
     souls = data.souls || [];
@@ -486,7 +568,7 @@ function renderSoulList() {
 
 async function selectSoul(soulId) {
   try {
-    const res = await fetch(`${API_BASE}/souls/${encodeURIComponent(soulId)}`);
+    const res = await fetchApi(`/souls/${encodeURIComponent(soulId)}`);
     if (!res.ok) throw new Error("soul not found");
     const soul = await res.json();
     currentSoulId = soulId;
@@ -525,7 +607,7 @@ async function savePersona() {
   savePersonaBtn.disabled = true;
   try {
     // Persist as a reusable soul in the harem library.
-    const soulRes = await fetch(`${API_BASE}/souls`, {
+    const soulRes = await fetchApi(`/souls`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -542,7 +624,7 @@ async function savePersona() {
     currentSoulId = soulData.soul.id;
 
     // Persist as the active override used by every /webhook/chat call.
-    const personaRes = await fetch(`${API_BASE}/persona`, {
+    const personaRes = await fetchApi(`/persona`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, birthday, avatar: avatar || "👑", personality: soulText, soul_md: soulText })
@@ -583,7 +665,7 @@ async function importSoulFromFile(file) {
   const text = await file.text();
   const idGuess = file.name.replace(/\.md$/i, "") || `imported-${Date.now()}`;
   try {
-    const res = await fetch(`${API_BASE}/souls/import`, {
+    const res = await fetchApi(`/souls/import`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id: idGuess, markdown: text })
@@ -652,7 +734,7 @@ loadState();
 // 初始化時預載角色頭貼（從 /persona 或預設 soul）
 (async function preloadAvatar() {
   try {
-    const personaRes = await fetch(`${API_BASE}/persona`);
+    const personaRes = await fetchApi(`/persona`);
     const personaData = await personaRes.json();
     const persona = personaData.persona || {};
     if (persona.avatar) {
@@ -663,7 +745,7 @@ loadState();
   } catch (_) {}
   // fallback: 從第一個 soul 載入頭貼
   try {
-    const soulsRes = await fetch(`${API_BASE}/souls`);
+    const soulsRes = await fetchApi(`/souls`);
     const soulsData = await soulsRes.json();
     const souls = soulsData.souls || [];
     if (souls[0]) {

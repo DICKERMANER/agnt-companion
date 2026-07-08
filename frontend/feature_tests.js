@@ -26,9 +26,9 @@ function testTypingIndicatorMarkupAndLogic() {
   assert(app.includes('hideTypingIndicator'), 'app.js should expose hideTypingIndicator logic');
 
   const sendMessageBody = getFunctionBody(app, 'sendMessage');
-  assert(sendMessageBody.indexOf('showTypingIndicator()') < sendMessageBody.indexOf('fetch(`${API_BASE}/webhook/chat`'), 'typing indicator should show before chat fetch');
+  assert(sendMessageBody.indexOf('showTypingIndicator()') < sendMessageBody.indexOf('fetchApi(`/webhook/chat`'), 'typing indicator should show before chat fetch');
   assert(sendMessageBody.includes('finally'), 'sendMessage should clean up loading state in finally');
-  assert(sendMessageBody.indexOf('hideTypingIndicator()') > sendMessageBody.indexOf('fetch(`${API_BASE}/webhook/chat`'), 'typing indicator should hide after chat fetch path is entered');
+  assert(sendMessageBody.indexOf('hideTypingIndicator()') > sendMessageBody.indexOf('fetchApi(`/webhook/chat`'), 'typing indicator should hide after chat fetch path is entered');
 }
 
 function testQuickActionParticles() {

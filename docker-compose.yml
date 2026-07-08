@@ -5,9 +5,9 @@ services:
     working_dir: /app/backend
     volumes:
       - ./:/app
-    command: bash -lc "pip install -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8000"
+    command: bash -lc "pip install -r requirements.txt && uvicorn main:app --host 0.0.0.0 --port 8002"
     ports:
-      - "8000:8000"
+      - "8002:8002"
 
   frontend:
     image: python:3.11-slim

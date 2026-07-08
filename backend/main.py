@@ -43,6 +43,7 @@ app.add_middleware(
         "http://localhost:8002",
         "http://127.0.0.1:8002",
     ],
+    allow_origin_regex=r"^https://dickermaner\.github\.io$|^https://.*\.trycloudflare\.com$|^http://(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}):(5500|8002)$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -411,4 +412,4 @@ async def webhook_chat(payload: ChatRequest, db: Session = Depends(get_db)) -> C
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8002, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=8002, log_level="info")
